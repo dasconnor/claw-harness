@@ -21,6 +21,8 @@ export class Workspace {
   private _profileDir: string
   private workspaceSubdir: string
   private skillsDir: string
+  /** The directory OpenClaw would use by default for this profile's workspace. */
+  private defaultWorkspaceDir: string
 
   get profileDir(): string { return this._profileDir }
 
@@ -30,12 +32,22 @@ export class Workspace {
     this._profileDir = join(home, `.openclaw-${this.profileName}`)
     this.workspaceSubdir = join(this._profileDir, 'workspace')
     this.skillsDir = join(this.workspaceSubdir, 'skills')
+    // OpenClaw resolves workspace to ~/.openclaw/workspace-<profile> by default
+    this.defaultWorkspaceDir = join(home, '.openclaw', `workspace-${this.profileName}`)
   }
 
   /**
    * Create the workspace directory structure and populate files.
    */
   async setup(config: BotConfig, runtime: BotRuntimeConfig): Promise<void> {
+    // Remove stale default-location workspace dir that OpenClaw may have created
+    // in previous runs (before we started overriding agents.defaults.workspace)
+    try {
+      await rm(this.defaultWorkspaceDir, { recursive: true, force: true })
+    } catch {
+      // Best-effort cleanup
+    }
+
     // Create directory structure
     await mkdir(this.skillsDir, { recursive: true })
 
@@ -97,6 +109,11 @@ export class Workspace {
     } catch {
       // Best-effort cleanup
     }
+    try {
+      await rm(this.defaultWorkspaceDir, { recursive: true, force: true })
+    } catch {
+      // Best-effort cleanup
+    }
   }
 
   private async buildConfig(
@@ -112,7 +129,11 @@ export class Workspace {
     // Build the config, merging preset with overrides
     const token = `claw-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-    const agentsDefaults: Record<string, unknown> = {}
+    const agentsDefaults: Record<string, unknown> = {
+      // Override workspace so the agent reads from our profile-scoped dir
+      // instead of the default ~/.openclaw/workspace-<profile>/
+      workspace: this.workspaceSubdir,
+    }
     if (config.model) {
       agentsDefaults.model = { primary: config.model }
     }

@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Workspace } from './workspace.js'
-import { mkdir, writeFile, readFile, rm } from 'node:fs/promises'
+import { mkdir, writeFile, readFile, rm, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
 const TEST_DIR = join(tmpdir(), 'claw-harness-workspace-test')
+const HOME = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
 
 describe('Workspace', () => {
   beforeEach(async () => {
@@ -14,8 +15,9 @@ describe('Workspace', () => {
   afterEach(async () => {
     await rm(TEST_DIR, { recursive: true, force: true })
     // Clean up any test profile directories
-    const home = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
-    await rm(join(home, '.openclaw-claw-harness-test-ws'), { recursive: true, force: true }).catch(() => {})
+    await rm(join(HOME, '.openclaw-claw-harness-test-ws'), { recursive: true, force: true }).catch(() => {})
+    // Clean up default-location workspace dir
+    await rm(join(HOME, '.openclaw', 'workspace-claw-harness-test-ws'), { recursive: true, force: true }).catch(() => {})
   })
 
   it('resolveContent returns inline content for strings with newlines', async () => {
@@ -102,5 +104,44 @@ describe('Workspace', () => {
     const configPath = join(ws.profileDir, 'openclaw.json')
     const config = JSON.parse(await readFile(configPath, 'utf-8'))
     expect(config.browser).toBeUndefined()
+  })
+
+  it('openclaw.json includes agents.defaults.workspace pointing to workspace subdir', async () => {
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({}, runtime)
+
+    const configPath = join(ws.profileDir, 'openclaw.json')
+    const config = JSON.parse(await readFile(configPath, 'utf-8'))
+    expect(config.agents.defaults.workspace).toBe(join(ws.profileDir, 'workspace'))
+  })
+
+  it('setup removes stale default-location workspace dir', async () => {
+    const staleDir = join(HOME, '.openclaw', 'workspace-claw-harness-test-ws')
+    await mkdir(staleDir, { recursive: true })
+    await writeFile(join(staleDir, 'AGENTS.md'), 'stale data')
+
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({}, runtime)
+
+    await expect(access(staleDir)).rejects.toThrow()
+  })
+
+  it('cleanup removes the default-location workspace dir', async () => {
+    const defaultDir = join(HOME, '.openclaw', 'workspace-claw-harness-test-ws')
+    await mkdir(defaultDir, { recursive: true })
+    await writeFile(join(defaultDir, 'AGENTS.md'), 'leftover data')
+
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({}, runtime)
+    // Re-create to simulate OpenClaw writing to default location during a run
+    await mkdir(defaultDir, { recursive: true })
+    await writeFile(join(defaultDir, 'AGENTS.md'), 'runtime leftover')
+
+    await ws.cleanup()
+
+    await expect(access(defaultDir)).rejects.toThrow()
   })
 })
