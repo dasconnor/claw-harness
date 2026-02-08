@@ -27,18 +27,18 @@ describe('DockerGateway', () => {
   })
 
   it('constructor sets container name from botId', () => {
-    const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+    const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
     expect(gw.token).toBe('')
   })
 
   it('token getter/setter work', () => {
-    const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+    const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
     gw.token = 'my-token'
     expect(gw.token).toBe('my-token')
   })
 
   it('stop() does not throw when not started', async () => {
-    const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+    const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
     await gw.stop() // should not throw
   })
 
@@ -47,7 +47,7 @@ describe('DockerGateway', () => {
       const originalPlatform = process.platform
       Object.defineProperty(process, 'platform', { value: 'linux', configurable: true })
 
-      const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+      const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
       const args = gw.buildDockerArgs({ anthropicApiKey: 'sk-test', openaiApiKey: '' })
 
       expect(args).toContain('--network')
@@ -63,7 +63,7 @@ describe('DockerGateway', () => {
       const originalPlatform = process.platform
       Object.defineProperty(process, 'platform', { value: 'darwin', configurable: true })
 
-      const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+      const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
       const args = gw.buildDockerArgs({ anthropicApiKey: 'sk-test', openaiApiKey: '' })
 
       expect(args).toContain('-p')
@@ -74,37 +74,37 @@ describe('DockerGateway', () => {
     })
 
     it('includes --shm-size and bind mount', () => {
-      const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+      const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
       const args = gw.buildDockerArgs({ anthropicApiKey: 'sk-test', openaiApiKey: '' })
 
       expect(args).toContain('--shm-size=2g')
       expect(args).toContain('-v')
       const vIndex = args.indexOf('-v')
-      expect(args[vIndex + 1]).toContain('/home/user/.openclaw-clawbench-alpha')
+      expect(args[vIndex + 1]).toContain('/home/user/.openclaw-claw-harness-alpha')
     })
 
     it('includes openai key when provided', () => {
-      const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+      const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
       const args = gw.buildDockerArgs({ anthropicApiKey: 'sk-test', openaiApiKey: 'sk-openai' })
 
       expect(args).toContain('OPENAI_API_KEY=sk-openai')
     })
 
     it('omits openai key when empty', () => {
-      const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+      const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
       const args = gw.buildDockerArgs({ anthropicApiKey: 'sk-test', openaiApiKey: '' })
 
       expect(args.join(' ')).not.toContain('OPENAI_API_KEY')
     })
 
     it('includes openclaw command with profile and port', () => {
-      const gw = new DockerGateway('alpha', 18800, 'clawbench-alpha', '/home/user/.openclaw-clawbench-alpha')
+      const gw = new DockerGateway('alpha', 18800, 'claw-harness-alpha', '/home/user/.openclaw-claw-harness-alpha')
       const args = gw.buildDockerArgs({ anthropicApiKey: 'sk-test', openaiApiKey: '' })
 
-      const imageIndex = args.indexOf('clawbench:latest')
+      const imageIndex = args.indexOf('claw-harness:latest')
       expect(imageIndex).toBeGreaterThan(-1)
       expect(args.slice(imageIndex + 1)).toEqual([
-        'openclaw', '--profile', 'clawbench-alpha', 'gateway', '--port', '18800',
+        'openclaw', '--profile', 'claw-harness-alpha', 'gateway', '--port', '18800',
       ])
     })
   })
@@ -117,7 +117,7 @@ describe('DockerGateway', () => {
       await ensureImage()
 
       expect(execFileSync).toHaveBeenCalledWith(
-        'docker', ['image', 'inspect', 'clawbench:latest'],
+        'docker', ['image', 'inspect', 'claw-harness:latest'],
         expect.objectContaining({ stdio: 'ignore' }),
       )
     })
@@ -133,7 +133,7 @@ describe('DockerGateway', () => {
 
       expect(execFileSync).toHaveBeenCalledTimes(2)
       expect(execFileSync).toHaveBeenLastCalledWith(
-        'docker', ['build', '-t', 'clawbench:latest', '/mock/pkg/docker'],
+        'docker', ['build', '-t', 'claw-harness:latest', '/mock/pkg/docker'],
         expect.objectContaining({ stdio: 'inherit' }),
       )
     })

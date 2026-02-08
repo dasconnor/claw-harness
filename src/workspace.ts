@@ -1,7 +1,7 @@
 /**
  * Workspace — Creates and manages isolated OpenClaw workspace directories.
  *
- * Each bot gets a profile directory at ~/.openclaw-clawbench-<id>/
+ * Each bot gets a profile directory at ~/.openclaw-claw-harness-<id>/
  * containing openclaw.json, USER.md, and skills.
  */
 
@@ -21,7 +21,7 @@ export class Workspace {
   get profileDir(): string { return this._profileDir }
 
   constructor(botId: string, baseDir: string) {
-    this.profileName = `clawbench-${botId}`
+    this.profileName = `claw-harness-${botId}`
     const home = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
     this._profileDir = join(home, `.openclaw-${this.profileName}`)
     this.workspaceSubdir = join(this._profileDir, 'workspace')
@@ -96,7 +96,7 @@ export class Workspace {
     }
 
     // Build the config, merging preset with overrides
-    const token = `clawbench-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const token = `claw-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
     // Build agents defaults with optional web_fetch allowlist
     const agentsDefaults: Record<string, unknown> = {}

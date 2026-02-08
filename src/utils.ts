@@ -1,5 +1,5 @@
 /**
- * Shared utilities for ClawBench.
+ * Shared utilities for Claw Harness.
  */
 
 import { fileURLToPath } from 'node:url'
@@ -66,7 +66,7 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Get the root directory of the clawbench package.
+ * Get the root directory of the claw-harness package.
  * Works whether running from source or as an installed npm package.
  */
 export async function getPackageRoot(): Promise<string> {

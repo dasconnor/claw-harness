@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * ClawBench CLI
+ * Claw Harness CLI
  *
  * Usage:
- *   clawbench run <scenario.yaml> [options]
- *   clawbench init <name>
- *   clawbench presets
+ *   claw-harness run <scenario.yaml> [options]
+ *   claw-harness init <name>
+ *   claw-harness presets
  */
 
 import { runScenario } from '../runner.js'
@@ -43,7 +43,7 @@ async function main() {
 async function handleRun(args: string[]) {
   const scenarioPath = args[0]
   if (!scenarioPath) {
-    console.error('Usage: clawbench run <scenario.yaml>')
+    console.error('Usage: claw-harness run <scenario.yaml>')
     process.exit(1)
   }
 
@@ -217,12 +217,12 @@ async function handlePresets() {
 
 function printHelp() {
   console.log(`
-ClawBench — Testing framework for OpenClaw bots
+Claw Harness — Testing framework for OpenClaw bots
 
 Usage:
-  clawbench run <scenario.yaml> [options]   Run a test scenario
-  clawbench init [name]                     Scaffold a new scenario
-  clawbench presets                         List available presets
+  claw-harness run <scenario.yaml> [options]   Run a test scenario
+  claw-harness init [name]                     Scaffold a new scenario
+  claw-harness presets                         List available presets
 
 Options:
   --model <model>       Override model for all bots
@@ -247,9 +247,9 @@ Docker Mode:
   headless browser support — no windows pop up on your desktop.
 
 Examples:
-  clawbench run scenarios/lounge-chat.yaml
-  clawbench run scenarios/lounge-chat.yaml --docker
-  clawbench run scenarios/lounge-chat.yaml --reporter json > results.json
+  claw-harness run scenarios/lounge-chat.yaml
+  claw-harness run scenarios/lounge-chat.yaml --docker
+  claw-harness run scenarios/lounge-chat.yaml --reporter json > results.json
 `)
 }
 

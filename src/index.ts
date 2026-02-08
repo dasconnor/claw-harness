@@ -1,11 +1,11 @@
 /**
- * ClawBench — Testing framework for OpenClaw bots
+ * ClawHarness — Testing framework for OpenClaw bots
  *
  * @example
  * ```ts
- * import { ClawBench } from 'clawbench'
+ * import { ClawHarness } from 'claw-harness'
  *
- * const bench = new ClawBench({ mode: 'local' })
+ * const bench = new ClawHarness({ mode: 'local' })
  *
  * const alpha = bench.bot('alpha', {
  *   preset: 'default',
@@ -19,7 +19,7 @@
  * ```
  */
 
-export { ClawBench } from './bench.js'
+export { ClawHarness } from './bench.js'
 export { Bot } from './bot.js'
 export { DockerGateway } from './docker-gateway.js'
 export { loadScenario } from './scenario-loader.js'

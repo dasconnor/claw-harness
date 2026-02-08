@@ -1,5 +1,5 @@
 /**
- * ClawBench — Main orchestrator class.
+ * Claw Harness — Main orchestrator class.
  *
  * Creates and manages bot instances, handles lifecycle.
  */
@@ -9,7 +9,7 @@ import type { BenchConfig, BotConfig, ScenarioResult, StepResult } from './types
 
 const DEFAULT_BASE_PORT = 18800
 
-export class ClawBench {
+export class ClawHarness {
   private config: Required<BenchConfig>
   private bots: Map<string, Bot> = new Map()
   private stepResults: StepResult[] = []
@@ -145,5 +145,5 @@ export class ClawBench {
 
 function defaultWorkspaceDir(): string {
   const home = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
-  return `${home}/.clawbench/workspaces`
+  return `${home}/.claw-harness/workspaces`
 }

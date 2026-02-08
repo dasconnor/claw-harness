@@ -5,8 +5,8 @@ import { Bot } from './bot.js'
 vi.mock('./workspace.js', () => {
   return {
     Workspace: vi.fn().mockImplementation(() => ({
-      profileName: 'clawbench-test',
-      profileDir: '/tmp/.openclaw-clawbench-test',
+      profileName: 'claw-harness-test',
+      profileDir: '/tmp/.openclaw-claw-harness-test',
       setup: vi.fn().mockResolvedValue(undefined),
       cleanup: vi.fn().mockResolvedValue(undefined),
     })),
@@ -93,7 +93,7 @@ describe('Bot', () => {
 
     const { DockerGateway } = await import('./docker-gateway.js')
     expect(vi.mocked(DockerGateway)).toHaveBeenCalledWith(
-      'test', 18800, 'clawbench-test', '/tmp/.openclaw-clawbench-test',
+      'test', 18800, 'claw-harness-test', '/tmp/.openclaw-claw-harness-test',
     )
   })
 
@@ -110,8 +110,8 @@ describe('Bot', () => {
 
     const mockCleanup = vi.fn().mockResolvedValue(undefined)
     vi.mocked(Workspace).mockImplementationOnce(() => ({
-      profileName: 'clawbench-test',
-      profileDir: '/tmp/.openclaw-clawbench-test',
+      profileName: 'claw-harness-test',
+      profileDir: '/tmp/.openclaw-claw-harness-test',
       setup: vi.fn().mockResolvedValue(undefined),
       cleanup: mockCleanup,
     }) as any)

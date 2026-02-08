@@ -37,7 +37,7 @@ export class Bot {
     this.id = id
     this.config = config
     this.runtime = runtime
-    this.sessionId = `clawbench-${id}-${Date.now()}`
+    this.sessionId = `claw-harness-${id}-${Date.now()}`
   }
 
   /**

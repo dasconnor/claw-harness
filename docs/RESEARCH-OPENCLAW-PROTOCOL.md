@@ -2,13 +2,13 @@
 
 *Compiled: 2026-02-07*
 
-Research findings on OpenClaw's gateway protocol, skills system, and deployment model for ClawBench integration.
+Research findings on OpenClaw's gateway protocol, skills system, and deployment model for Claw Harness integration.
 
 ---
 
 ## Key Finding: Two Integration Paths
 
-OpenClaw exposes two programmatic interfaces on the same port. Both are viable for ClawBench:
+OpenClaw exposes two programmatic interfaces on the same port. Both are viable for Claw Harness:
 
 ### Path A: WebSocket Protocol (Full Control)
 
@@ -24,7 +24,7 @@ JSON-RPC-style protocol with `req/res/event` frames.
     "minProtocol": 1,
     "maxProtocol": 1,
     "auth": { "token": "your-gateway-token" },
-    "client": { "name": "clawbench", "version": "0.1.0" },
+    "client": { "name": "claw-harness", "version": "0.1.0" },
     "capabilities": ["agent", "events"]
   }
 }
@@ -77,7 +77,7 @@ curl http://127.0.0.1:18789/v1/chat/completions \
     "model": "openclaw",
     "messages": [{"role": "user", "content": "Read the skill and register"}],
     "stream": false,
-    "user": "clawbench-alpha-session"
+    "user": "claw-harness-alpha-session"
   }'
 ```
 
@@ -158,7 +158,7 @@ Required fields: `name`, `description`. Everything else is optional.
 
 Each workspace can contain these files that get injected into the system prompt:
 
-| File | Purpose | ClawBench Usage |
+| File | Purpose | Claw Harness Usage |
 |------|---------|-----------------|
 | `USER.md` | Who the user is, preferences | **Bot persona / instructions** |
 | `AGENTS.md` | Operating rules, priorities | General agent rules |
@@ -171,7 +171,7 @@ All live in workspace root: `~/.openclaw-<profile>/workspace/`
 
 Max size: 20,000 chars each (default, configurable via `bootstrapMaxChars`).
 
-**For ClawBench, the key files are:**
+**For Claw Harness, the key files are:**
 - `USER.md` — persona and behavioral instructions
 - `SOUL.md` — personality boundaries (optional)
 - Skills in `workspace/skills/` — what the bot can do
@@ -187,7 +187,7 @@ Minimal config for a test bot:
   "gateway": {
     "mode": "local",
     "port": 18789,
-    "auth": { "token": "clawbench-alpha-token" },
+    "auth": { "token": "claw-harness-alpha-token" },
     "http": {
       "endpoints": {
         "chatCompletions": { "enabled": true }
@@ -230,36 +230,36 @@ Key settings:
 
 ---
 
-## ClawBench Workspace Setup Recipe
+## Claw Harness Workspace Setup Recipe
 
-For each bot, ClawBench will:
+For each bot, Claw Harness will:
 
 ```bash
 # 1. Create profile directory
-mkdir -p ~/.openclaw-clawbench-alpha/workspace/skills/moltup
+mkdir -p ~/.openclaw-claw-harness-alpha/workspace/skills/moltup
 
 # 2. Write openclaw.json (from preset + overrides)
-# → ~/.openclaw-clawbench-alpha/openclaw.json
+# → ~/.openclaw-claw-harness-alpha/openclaw.json
 
 # 3. Fetch and write skill.md
 curl -s http://localhost:3000/skill.md > \
-  ~/.openclaw-clawbench-alpha/workspace/skills/moltup/SKILL.md
+  ~/.openclaw-claw-harness-alpha/workspace/skills/moltup/SKILL.md
 
 # 4. Write persona (user.md)
-# → ~/.openclaw-clawbench-alpha/workspace/USER.md
+# → ~/.openclaw-claw-harness-alpha/workspace/USER.md
 
 # 5. Start gateway
 ANTHROPIC_API_KEY=sk-ant-xxx \
-openclaw --profile clawbench-alpha gateway --port 18789 &
+openclaw --profile claw-harness-alpha gateway --port 18789 &
 
 # 6. Send prompts via HTTP API
 curl http://127.0.0.1:18789/v1/chat/completions \
-  -H "Authorization: Bearer clawbench-alpha-token" \
+  -H "Authorization: Bearer claw-harness-alpha-token" \
   -d '{"model":"openclaw","messages":[{"role":"user","content":"..."}],"user":"test-session"}'
 
 # 7. Cleanup
 kill %1
-rm -rf ~/.openclaw-clawbench-alpha
+rm -rf ~/.openclaw-claw-harness-alpha
 ```
 
 ---

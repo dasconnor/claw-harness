@@ -1,10 +1,10 @@
-# ClawBench Guide
+# Claw Harness Guide
 
-A comprehensive guide for writing and running ClawBench tests, aimed at AI agents and developers.
+A comprehensive guide for writing and running Claw Harness tests, aimed at AI agents and developers.
 
-## What ClawBench Does
+## What Claw Harness Does
 
-ClawBench is a testing framework for OpenClaw bots. It spins up isolated OpenClaw agent instances with configurable skills and personas, drives them through multi-turn prompt sequences, evaluates responses with assertions, and produces structured results. The core question it answers: **can a real AI agent, given only your skill.md, figure out how to use your site?**
+Claw Harness is a testing framework for OpenClaw bots. It spins up isolated OpenClaw agent instances with configurable skills and personas, drives them through multi-turn prompt sequences, evaluates responses with assertions, and produces structured results. The core question it answers: **can a real AI agent, given only your skill.md, figure out how to use your site?**
 
 ## Prerequisites
 
@@ -178,18 +178,18 @@ Docker mode runs each bot's OpenClaw gateway inside a container with Xvfb and Ch
 
 **CLI:**
 ```bash
-clawbench run my-scenario.yaml --docker
+claw-harness run my-scenario.yaml --docker
 ```
 
 **Programmatic:**
 ```ts
-const bench = new ClawBench({ mode: 'docker' })
+const bench = new ClawHarness({ mode: 'docker' })
 ```
 
 ### How It Works
 
-1. On first run, ClawBench builds a Docker image (`clawbench:latest`) containing Node.js 22, Chromium, Xvfb, and OpenClaw (~800MB, cached after first build)
-2. Each bot gets its own container named `clawbench-{botId}`
+1. On first run, Claw Harness builds a Docker image (`claw-harness:latest`) containing Node.js 22, Chromium, Xvfb, and OpenClaw (~800MB, cached after first build)
+2. Each bot gets its own container named `claw-harness-{botId}`
 3. The bot's profile directory is bind-mounted into the container
 4. Xvfb provides a virtual display for Chromium (no GUI needed)
 5. The container runs `openclaw gateway` with the same profile/port as local mode
@@ -203,19 +203,19 @@ const bench = new ClawBench({ mode: 'docker' })
 
 - **First-run build time:** 2-5 minutes to download the base image + Chromium + OpenClaw
 - **OpenClaw version:** Uses `@latest` inside the container, which may differ from the host's version
-- **Orphaned containers:** If ClawBench crashes, containers keep running. Clean up with `docker rm -f $(docker ps -q --filter name=clawbench-)`
+- **Orphaned containers:** If Claw Harness crashes, containers keep running. Clean up with `docker rm -f $(docker ps -q --filter name=claw-harness-)`
 - **No GPU passthrough:** Chromium runs in software rendering mode
 
 ## CLI Reference
 
-### `clawbench run <scenario.yaml> [options]`
+### `claw-harness run <scenario.yaml> [options]`
 
 Run a test scenario.
 
 ```bash
-clawbench run my-test.yaml
-clawbench run my-test.yaml --model anthropic/claude-sonnet-4-5-20250929
-clawbench run my-test.yaml --reporter json > results.json
+claw-harness run my-test.yaml
+claw-harness run my-test.yaml --model anthropic/claude-sonnet-4-5-20250929
+claw-harness run my-test.yaml --reporter json > results.json
 ```
 
 **Options:**
@@ -226,25 +226,25 @@ clawbench run my-test.yaml --reporter json > results.json
 - `0` — All steps succeeded and all assertions passed
 - `1` — Any step error or assertion failure
 
-### `clawbench init [name]`
+### `claw-harness init [name]`
 
 Scaffold a new scenario file from a template.
 
 ```bash
-clawbench init my-scenario
+claw-harness init my-scenario
 # Creates my-scenario.yaml
 ```
 
-### `clawbench presets`
+### `claw-harness presets`
 
 List available preset configs, personas, and example scenarios.
 
 ## Programmatic API
 
 ```ts
-import { ClawBench } from 'clawbench'
+import { ClawHarness } from 'claw-harness'
 
-const bench = new ClawBench({ mode: 'local' })
+const bench = new ClawHarness({ mode: 'local' })
 
 const alpha = bench.bot('alpha', {
   preset: 'default',
@@ -266,7 +266,7 @@ await bench.stop()
 ### Running a scenario programmatically
 
 ```ts
-import { runScenario } from 'clawbench'
+import { runScenario } from 'claw-harness'
 
 const result = await runScenario('./my-test.yaml', {
   modelOverride: 'anthropic/claude-sonnet-4-5-20250929',
@@ -371,7 +371,7 @@ after:
 
 ### web_fetch and Localhost
 
-ClawBench automatically configures the `web_fetch` allowlist based on `target.base_url`. The following hosts are always allowed:
+Claw Harness automatically configures the `web_fetch` allowlist based on `target.base_url`. The following hosts are always allowed:
 - `localhost`
 - `127.0.0.1`
 - The hostname from `target.base_url`

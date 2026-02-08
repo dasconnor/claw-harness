@@ -10,7 +10,7 @@ import { getPackageRoot } from './utils.js'
 
 const HEALTH_CHECK_INTERVAL = 1000
 const HEALTH_CHECK_TIMEOUT = 60_000
-const IMAGE_NAME = 'clawbench:latest'
+const IMAGE_NAME = 'claw-harness:latest'
 
 let imageReady = false
 
@@ -32,7 +32,7 @@ export async function ensureImage(): Promise<void> {
   const pkgRoot = await getPackageRoot()
   const dockerDir = join(pkgRoot, 'docker')
 
-  console.log('Building clawbench Docker image (first run — this may take a few minutes)...')
+  console.log('Building claw-harness Docker image (first run — this may take a few minutes)...')
 
   try {
     execFileSync('docker', ['build', '-t', IMAGE_NAME, dockerDir], {
@@ -67,7 +67,7 @@ export class DockerGateway {
     this.port = port
     this.profileName = profileName
     this.hostProfileDir = hostProfileDir
-    this.containerName = `clawbench-${botId}`
+    this.containerName = `claw-harness-${botId}`
   }
 
   get token(): string {

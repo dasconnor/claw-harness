@@ -1,12 +1,12 @@
 {
-  "name": "clawbench",
+  "name": "claw-harness",
   "version": "0.1.0",
   "description": "Testing framework for OpenClaw bots. Spin up real agents, load skills, drive multi-turn prompts, and capture results.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "clawbench": "dist/bin/clawbench.js"
+    "claw-harness": "dist/bin/clawbench.js"
   },
   "scripts": {
     "build": "tsc",
@@ -24,6 +24,15 @@
     "skill-testing"
   ],
   "files": ["dist", "presets", "docker"],
+  "author": "Connor Daly connor@iceblock.ventures",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dasconnor/claw-harness.git"
+  },
+  "homepage": "https://github.com/dasconnor/claw-harness#readme",
+  "bugs": {
+    "url": "https://github.com/dasconnor/claw-harness/issues"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=22"
