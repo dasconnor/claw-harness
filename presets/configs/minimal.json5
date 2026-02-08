@@ -1,0 +1,27 @@
+{
+  // Minimal config — restricted tools, lower cost
+  "gateway": {
+    "mode": "local",
+    "http": {
+      "endpoints": {
+        "chatCompletions": { "enabled": true }
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": { "primary": "anthropic/claude-haiku-4-5-20251001" },
+      "tools": {
+        "profile": "minimal",
+        "allow": ["read", "write", "web_fetch"],
+        "deny": ["exec", "browser", "canvas"]
+      }
+    },
+    "list": [
+      { "id": "main", "default": true }
+    ]
+  },
+  "skills": {
+    "allowBundled": []
+  }
+}

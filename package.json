@@ -1,0 +1,40 @@
+{
+  "name": "clawbench",
+  "version": "0.1.0",
+  "description": "Testing framework for OpenClaw bots. Spin up real agents, load skills, drive multi-turn prompts, and capture results.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "clawbench": "dist/bin/clawbench.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "tsc --noEmit",
+    "postbuild": "chmod +x dist/bin/clawbench.js"
+  },
+  "keywords": [
+    "openclaw",
+    "testing",
+    "ai-agents",
+    "benchmark",
+    "bot-testing",
+    "skill-testing"
+  ],
+  "files": ["dist", "presets"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "json5": "^2.2.3",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

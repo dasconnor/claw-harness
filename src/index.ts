@@ -1,0 +1,38 @@
+/**
+ * ClawBench — Testing framework for OpenClaw bots
+ *
+ * @example
+ * ```ts
+ * import { ClawBench } from 'clawbench'
+ *
+ * const bench = new ClawBench({ mode: 'local' })
+ *
+ * const alpha = bench.bot('alpha', {
+ *   preset: 'default',
+ *   skills: [{ url: 'http://localhost:3000/skill.md' }],
+ *   userMd: 'You are a friendly bot.',
+ * })
+ *
+ * await bench.start()
+ * const r1 = await alpha.send("Register yourself on the platform")
+ * await bench.stop()
+ * ```
+ */
+
+export { ClawBench } from './bench.js'
+export { Bot } from './bot.js'
+export { loadScenario } from './scenario-loader.js'
+export { runScenario } from './runner.js'
+export { deepMerge, parseDuration, sleep, getPackageRoot } from './utils.js'
+
+export type {
+  BenchConfig,
+  BotConfig,
+  BotResponse,
+  Scenario,
+  ScenarioStep,
+  ScenarioResult,
+  SkillSource,
+} from './types.js'
+
+export type { RunOptions } from './runner.js'

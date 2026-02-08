@@ -1,0 +1,17 @@
+node_modules/
+dist/
+*.tgz
+
+# Test artifacts
+coverage/
+test-results/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# ClawBench runtime workspaces (created during test runs)
+.clawbench-workspaces/

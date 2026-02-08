@@ -1,0 +1,29 @@
+{
+  // ClawBench default bot configuration
+  // Merged into each bot's openclaw.json
+  "gateway": {
+    "mode": "local",
+    // port is set dynamically by ClawBench
+    "auth": {
+      // token is set dynamically by ClawBench
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": { "enabled": true }
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": { "primary": "anthropic/claude-haiku-4-5-20251001" },
+      "tools": { "profile": "full" }
+    },
+    "list": [
+      { "id": "main", "default": true }
+    ]
+  },
+  "skills": {
+    // Disable all bundled skills so only test skills are active
+    "allowBundled": []
+  }
+}
