@@ -44,6 +44,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
           git checkout main
           npm version "$VERSION" --no-git-tag-version --allow-same-version
           git add package.json
