@@ -37,7 +37,46 @@ function validateScenario(raw: unknown): Scenario {
   const botIds = new Set(Object.keys(obj.bots as Record<string, unknown>))
   validateStepBotRefs(obj.steps as ScenarioStep[], botIds)
 
+  // Validate expect fields in steps
+  validateStepExpectations(obj.steps as ScenarioStep[])
+
+  // Validate healthcheck if present
+  if (obj.healthcheck !== undefined) {
+    const hc = obj.healthcheck as Record<string, unknown>
+    if (!hc.url || typeof hc.url !== 'string') {
+      throw new Error('Healthcheck must have a "url" field')
+    }
+  }
+
+  // Validate after steps if present
+  if (obj.after !== undefined) {
+    if (!Array.isArray(obj.after)) {
+      throw new Error('"after" must be an array of steps')
+    }
+    validateStepBotRefs(obj.after as ScenarioStep[], botIds)
+    validateStepExpectations(obj.after as ScenarioStep[])
+  }
+
   return obj as unknown as Scenario
+}
+
+function validateStepExpectations(steps: ScenarioStep[]): void {
+  for (const step of steps) {
+    if (step.expect) {
+      const { contains, not_contains, matches } = step.expect
+      if (contains === undefined && not_contains === undefined && matches === undefined) {
+        throw new Error('Step "expect" must have at least one of: contains, not_contains, matches')
+      }
+    }
+
+    if (step.steps) {
+      validateStepExpectations(step.steps)
+    }
+
+    if (step.parallel) {
+      validateStepExpectations(step.parallel)
+    }
+  }
 }
 
 function validateStepBotRefs(steps: ScenarioStep[], botIds: Set<string>): void {

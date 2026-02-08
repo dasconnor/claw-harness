@@ -23,6 +23,7 @@ export class ClawBench {
       workspaceDir: config.workspaceDir ?? defaultWorkspaceDir(),
       anthropicApiKey: config.anthropicApiKey ?? process.env.ANTHROPIC_API_KEY ?? '',
       openaiApiKey: config.openaiApiKey ?? process.env.OPENAI_API_KEY ?? '',
+      anthropicAdminKey: config.anthropicAdminKey ?? process.env.ANTHROPIC_ADMIN_API_KEY ?? '',
     }
   }
 
@@ -111,6 +112,18 @@ export class ClawBench {
       }
     }
 
+    // Aggregate assertion counts
+    let totalAssertions = 0
+    let passedAssertions = 0
+    for (const step of this.stepResults) {
+      if (step.assertions) {
+        for (const a of step.assertions) {
+          totalAssertions++
+          if (a.passed) passedAssertions++
+        }
+      }
+    }
+
     return {
       name: '',
       startTime: this.startTime ?? endTime,
@@ -120,6 +133,11 @@ export class ClawBench {
         : 0,
       steps: this.stepResults,
       bots: botSummaries,
+      assertions: {
+        total: totalAssertions,
+        passed: passedAssertions,
+        failed: totalAssertions - passedAssertions,
+      },
     }
   }
 }
