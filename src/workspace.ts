@@ -98,15 +98,9 @@ export class Workspace {
     // Build the config, merging preset with overrides
     const token = `claw-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-    // Build agents defaults with optional web_fetch allowlist
     const agentsDefaults: Record<string, unknown> = {}
     if (config.model) {
       agentsDefaults.model = { primary: config.model }
-    }
-    if (config.allowedHosts && config.allowedHosts.length > 0) {
-      agentsDefaults.web_fetch = {
-        allowed_hosts: config.allowedHosts,
-      }
     }
 
     let result = deepMerge(base, {
