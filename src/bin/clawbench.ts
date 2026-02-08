@@ -10,9 +10,9 @@
  */
 
 import { runScenario } from '../runner.js'
-import { getPackageRoot } from '../utils.js'
+import { getPackageRoot, loadEnvFiles } from '../utils.js'
 import { readdir, readFile, copyFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
 
 const args = process.argv.slice(2)
 const command = args[0]
@@ -61,6 +61,12 @@ async function handleRun(args: string[]) {
         break
     }
   }
+
+  // Load .env files from cwd, scenario directory, and its parent
+  // (handles repo-root .env when scenario is in a subdirectory)
+  const scenarioDir = dirname(resolve(scenarioPath))
+  const scenarioParent = dirname(scenarioDir)
+  await loadEnvFiles(process.cwd(), scenarioDir, scenarioParent)
 
   console.log(`Running scenario: ${scenarioPath}`)
   console.log()

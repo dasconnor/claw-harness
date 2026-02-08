@@ -23,7 +23,7 @@ export { ClawBench } from './bench.js'
 export { Bot } from './bot.js'
 export { loadScenario } from './scenario-loader.js'
 export { runScenario } from './runner.js'
-export { deepMerge, parseDuration, sleep, getPackageRoot } from './utils.js'
+export { deepMerge, parseDuration, sleep, getPackageRoot, loadEnvFiles } from './utils.js'
 
 export type {
   BenchConfig,

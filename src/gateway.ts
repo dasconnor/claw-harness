@@ -47,9 +47,16 @@ export class Gateway {
       // Token will be empty if config can't be read
     }
 
+    // Build environment: inherit process env but override keys that could
+    // leak into a global OpenClaw instance or read global config.
+    const profileDir = `${home}/.openclaw-${this.profileName}`
+
     const processEnv: Record<string, string> = {
       ...process.env as Record<string, string>,
       ANTHROPIC_API_KEY: env.anthropicApiKey,
+      // Force OpenClaw to use the profile-scoped state, never global
+      OPENCLAW_STATE_DIR: profileDir,
+      OPENCLAW_CONFIG_PATH: `${profileDir}/openclaw.json`,
     }
 
     if (env.openaiApiKey) {
