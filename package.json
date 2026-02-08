@@ -1,6 +1,6 @@
 {
   "name": "claw-harness",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Testing framework for OpenClaw bots. Spin up real agents, load skills, drive multi-turn prompts, and capture results.",
   "type": "module",
   "main": "dist/index.js",
