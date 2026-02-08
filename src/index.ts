@@ -23,6 +23,7 @@ export { ClawBench } from './bench.js'
 export { Bot } from './bot.js'
 export { loadScenario } from './scenario-loader.js'
 export { runScenario } from './runner.js'
+export { queryUsage } from './cost-tracker.js'
 export { deepMerge, parseDuration, sleep, getPackageRoot, loadEnvFiles } from './utils.js'
 
 export type {
@@ -32,6 +33,10 @@ export type {
   Scenario,
   ScenarioStep,
   ScenarioResult,
+  StepExpectation,
+  AssertionResult,
+  StepResult,
+  CostReport,
   SkillSource,
 } from './types.js'
 

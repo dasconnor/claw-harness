@@ -104,11 +104,39 @@ async function handleRun(args: string[]) {
       }
       console.log()
     }
+
+    // Assertion summary
+    if (result.assertions.total > 0) {
+      console.log('-'.repeat(60))
+      console.log(`Assertions: ${result.assertions.passed} passed, ${result.assertions.failed} failed, ${result.assertions.total} total`)
+      console.log()
+      for (const step of result.steps) {
+        if (step.assertions && step.assertions.length > 0) {
+          for (const a of step.assertions) {
+            const icon = a.passed ? '\u2713' : '\u2717'
+            const detail = a.passed ? '' : ' (not found in response)'
+            console.log(`  ${icon} [${step.botId}] "${step.prompt.slice(0, 40).trim()}" \u2014 ${a.type} "${a.expected}"${detail}`)
+          }
+        }
+      }
+      console.log()
+    }
+
+    // Cost summary
+    if (result.cost) {
+      const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
+      console.log(`Cost: ~$${result.cost.estimatedCost.toFixed(2)} (${fmt(result.cost.inputTokens)} input tokens, ${fmt(result.cost.outputTokens)} output tokens)`)
+      for (const [model, data] of Object.entries(result.cost.models)) {
+        console.log(`  ${model}: $${data.cost.toFixed(2)} (${fmt(data.inputTokens)} in / ${fmt(data.outputTokens)} out)`)
+      }
+      console.log()
+    }
   }
 
-  // Exit with error if any step failed
+  // Exit with error if any step failed or assertions failed
   const totalErrors = Object.values(result.bots).reduce((sum, b) => sum + b.errors, 0)
-  process.exit(totalErrors > 0 ? 1 : 0)
+  const hasFailures = totalErrors > 0 || result.assertions.failed > 0
+  process.exit(hasFailures ? 1 : 0)
 }
 
 async function handleInit(args: string[]) {
@@ -196,8 +224,16 @@ Options:
   --reporter <format>   Output format: console (default) | json
 
 Environment:
-  ANTHROPIC_API_KEY     Required for Claude models
-  OPENAI_API_KEY        Required for OpenAI models
+  ANTHROPIC_API_KEY          Required for Claude models
+  OPENAI_API_KEY             Required for OpenAI models
+  ANTHROPIC_ADMIN_API_KEY    Optional: enables cost tracking via Admin API
+
+Features:
+  - Step assertions (expect.contains, expect.not_contains, expect.matches)
+  - Health checks (healthcheck.url verified before bot startup)
+  - Cleanup hooks (after: steps run even if main steps fail)
+  - Cost tracking (automatic with ANTHROPIC_ADMIN_API_KEY)
+  - web_fetch localhost allowlist (auto-configured from target.base_url)
 
 Examples:
   clawbench run scenarios/lounge-chat.yaml

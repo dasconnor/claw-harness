@@ -4,6 +4,7 @@
 
 import { ClawBench } from './bench.js'
 import { loadScenario } from './scenario-loader.js'
+import { queryUsage } from './cost-tracker.js'
 import { parseDuration, sleep } from './utils.js'
 import type {
   BenchConfig,
@@ -12,6 +13,8 @@ import type {
   ScenarioStep,
   ScenarioResult,
   StepResult,
+  AssertionResult,
+  StepExpectation,
 } from './types.js'
 
 export interface RunOptions {
@@ -27,7 +30,16 @@ export async function runScenario(
   options?: RunOptions,
 ): Promise<ScenarioResult> {
   const scenario = await loadScenario(scenarioPath)
+
+  // Health check before starting anything
+  if (scenario.healthcheck) {
+    await performHealthCheck(scenario.healthcheck.url, scenario.healthcheck.timeout)
+  }
+
   const bench = new ClawBench({ mode: 'local', ...options?.configOverrides })
+
+  // Determine allowed hosts from target URL
+  const allowedHosts = buildAllowedHosts(scenario)
 
   // Register bots
   for (const [botId, botConfig] of Object.entries(scenario.bots)) {
@@ -42,10 +54,12 @@ export async function runScenario(
         name: s.name ?? 'skill',
       })),
       configOverrides: botConfig.config_overrides,
+      allowedHosts,
     }
     bench.bot(botId, config)
   }
 
+  let mainError: unknown
   try {
     // Start all bots
     console.log(`Starting ${Object.keys(scenario.bots).length} bot(s)...`)
@@ -54,15 +68,80 @@ export async function runScenario(
 
     // Execute steps
     await executeSteps(bench, scenario.steps)
-
-    // Collect results
-    const results = bench.getResults()
-    results.name = scenario.name
-    return results
+  } catch (err) {
+    mainError = err
   } finally {
+    // Run cleanup steps if defined
+    if (scenario.after && scenario.after.length > 0) {
+      try {
+        console.log('Running cleanup steps...')
+        await executeSteps(bench, scenario.after)
+      } catch (err) {
+        console.error('Cleanup step error (non-fatal):', err)
+      }
+    }
+
     console.log('Stopping bots...')
     await bench.stop()
   }
+
+  // Collect results
+  const results = bench.getResults()
+  results.name = scenario.name
+
+  // Cost tracking
+  const adminKey = options?.configOverrides?.anthropicAdminKey
+    ?? process.env.ANTHROPIC_ADMIN_API_KEY
+  if (adminKey) {
+    try {
+      const cost = await queryUsage(adminKey, results.startTime, results.endTime)
+      if (cost) results.cost = cost
+    } catch {
+      // Cost tracking is best-effort
+    }
+  }
+
+  if (mainError) throw mainError
+  return results
+}
+
+async function performHealthCheck(url: string, timeout?: string): Promise<void> {
+  const timeoutMs = parseDuration(timeout ?? '10s')
+  console.log(`Health check: ${url}`)
+
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    console.log('Health check passed.')
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    throw new Error(`Health check failed: ${url} — is the target service running? (${msg})`)
+  }
+}
+
+function buildAllowedHosts(scenario: Scenario): string[] {
+  const hosts = new Set<string>(['localhost', '127.0.0.1'])
+
+  if (scenario.target?.base_url) {
+    try {
+      const parsed = new URL(scenario.target.base_url)
+      hosts.add(parsed.hostname)
+    } catch {
+      // Invalid URL, skip
+    }
+  }
+
+  if (scenario.target?.allowed_hosts) {
+    for (const host of scenario.target.allowed_hosts) {
+      hosts.add(host)
+    }
+  }
+
+  return [...hosts]
 }
 
 async function executeSteps(bench: ClawBench, steps: ScenarioStep[]): Promise<void> {
@@ -118,11 +197,15 @@ async function executeSingleStep(bench: ClawBench, step: ScenarioStep): Promise<
     })),
   ])
 
+  // Evaluate assertions if present
+  const assertions = step.expect ? evaluateAssertions(response.text, step.expect) : undefined
+
   const result: StepResult = {
     botId: step.bot,
     prompt: step.prompt,
     response,
     timestamp: new Date().toISOString(),
+    assertions,
   }
 
   bench.recordStep(result)
@@ -132,4 +215,41 @@ async function executeSingleStep(bench: ClawBench, step: ScenarioStep): Promise<
   } else {
     console.error(`[${step.bot}] Error: ${response.error}`)
   }
+
+  if (assertions) {
+    for (const a of assertions) {
+      const icon = a.passed ? '\u2713' : '\u2717'
+      console.log(`  ${icon} ${a.type}: "${a.expected}" — ${a.passed ? 'passed' : 'FAILED'}`)
+    }
+  }
+}
+
+function evaluateAssertions(text: string, expect: StepExpectation): AssertionResult[] {
+  const results: AssertionResult[] = []
+
+  if (expect.contains !== undefined) {
+    results.push({
+      type: 'contains',
+      expected: expect.contains,
+      passed: text.includes(expect.contains),
+    })
+  }
+
+  if (expect.not_contains !== undefined) {
+    results.push({
+      type: 'not_contains',
+      expected: expect.not_contains,
+      passed: !text.includes(expect.not_contains),
+    })
+  }
+
+  if (expect.matches !== undefined) {
+    results.push({
+      type: 'matches',
+      expected: expect.matches,
+      passed: new RegExp(expect.matches).test(text),
+    })
+  }
+
+  return results
 }

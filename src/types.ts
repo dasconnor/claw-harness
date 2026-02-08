@@ -15,6 +15,8 @@ export interface BenchConfig {
   anthropicApiKey?: string
   /** OpenAI API key. Default: reads from OPENAI_API_KEY env var */
   openaiApiKey?: string
+  /** Anthropic Admin API key for cost tracking. Default: reads from ANTHROPIC_ADMIN_API_KEY env var */
+  anthropicAdminKey?: string
 }
 
 // --- Bot Configuration ---
@@ -41,6 +43,8 @@ export interface BotConfig {
   skills?: SkillSource[]
   /** Additional config overrides merged into openclaw.json */
   configOverrides?: Record<string, unknown>
+  /** Allowed hosts for web_fetch (set internally by runner) */
+  allowedHosts?: string[]
 }
 
 // --- Bot Response ---
@@ -65,9 +69,18 @@ export interface Scenario {
   description?: string
   target?: {
     base_url?: string
+    /** Additional hosts to allow for web_fetch beyond base_url */
+    allowed_hosts?: string[]
+  }
+  /** Health check URL to verify before starting bots */
+  healthcheck?: {
+    url: string
+    timeout?: string
   }
   bots: Record<string, ScenarioBotConfig>
   steps: ScenarioStep[]
+  /** Cleanup steps to run after main steps (even if they fail) */
+  after?: ScenarioStep[]
   evaluate?: ScenarioEvaluation[]
 }
 
@@ -84,6 +97,23 @@ export interface ScenarioBotConfig {
   config_overrides?: Record<string, unknown>
 }
 
+// --- Step Assertions ---
+
+export interface StepExpectation {
+  /** response.text must contain this string */
+  contains?: string
+  /** response.text must NOT contain this string */
+  not_contains?: string
+  /** response.text must match this regex */
+  matches?: string
+}
+
+export interface AssertionResult {
+  type: 'contains' | 'not_contains' | 'matches'
+  expected: string
+  passed: boolean
+}
+
 export interface ScenarioStep {
   /** Which bot should execute this step */
   bot?: string
@@ -91,6 +121,8 @@ export interface ScenarioStep {
   prompt?: string
   /** Timeout for this step */
   timeout?: string
+  /** Assertions to check on the response */
+  expect?: StepExpectation
   /** Repeat block */
   repeat?: number
   /** Interval between repeats */
@@ -113,6 +145,18 @@ export interface StepResult {
   prompt: string
   response: BotResponse
   timestamp: string
+  assertions?: AssertionResult[]
+}
+
+export interface CostReport {
+  inputTokens: number
+  outputTokens: number
+  estimatedCost: number
+  models: Record<string, {
+    inputTokens: number
+    outputTokens: number
+    cost: number
+  }>
 }
 
 export interface ScenarioResult {
@@ -126,4 +170,10 @@ export interface ScenarioResult {
     totalDuration: number
     errors: number
   }>
+  assertions: {
+    total: number
+    passed: number
+    failed: number
+  }
+  cost?: CostReport
 }
