@@ -12,6 +12,10 @@ import type { BotConfig } from './types.js'
 import type { BotRuntimeConfig } from './bot.js'
 import { deepMerge, getPackageRoot } from './utils.js'
 
+const AGENTS_MD_NETWORK_NOTICE = `## Claw Harness: Network Access
+
+Do not use \`web_fetch\` for localhost or private network URLs — it will be blocked by SSRF protection. Instead, use \`exec\` with \`curl\` for local HTTP requests. For example: \`curl -s http://localhost:3000/api/endpoint\``
+
 export class Workspace {
   readonly profileName: string
   private _profileDir: string
@@ -64,6 +68,16 @@ export class Workspace {
     if (config.soulMd) {
       const content = await this.resolveContent(config.soulMd)
       await writeFile(join(this.workspaceSubdir, 'SOUL.md'), content)
+    }
+
+    // Write AGENTS.md (operational rules/context + auto-injected workarounds)
+    {
+      const parts: string[] = []
+      if (config.agentsMd) {
+        parts.push(await this.resolveContent(config.agentsMd))
+      }
+      parts.push(AGENTS_MD_NETWORK_NOTICE)
+      await writeFile(join(this.workspaceSubdir, 'AGENTS.md'), parts.join('\n\n'))
     }
 
     // Install skills

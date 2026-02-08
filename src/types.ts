@@ -41,6 +41,8 @@ export interface BotConfig {
   soulMd?: string
   /** Skills to load for this bot */
   skills?: SkillSource[]
+  /** Path to an agents.md file, or inline string content (operational rules/context) */
+  agentsMd?: string
   /** Additional config overrides merged into openclaw.json */
   configOverrides?: Record<string, unknown>
 }
@@ -90,6 +92,7 @@ export interface ScenarioBotConfig {
     path?: string
     name?: string
   }>
+  agents_md?: string
   config_overrides?: Record<string, unknown>
 }
 

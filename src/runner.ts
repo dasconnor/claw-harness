@@ -44,6 +44,7 @@ export async function runScenario(
       model: options?.modelOverride ?? botConfig.model,
       userMd: botConfig.user_md,
       soulMd: botConfig.soul_md,
+      agentsMd: botConfig.agents_md,
       skills: botConfig.skills?.map(s => ({
         url: s.url,
         path: s.path,

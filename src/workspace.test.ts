@@ -69,6 +69,31 @@ describe('Workspace', () => {
     expect(config.browser).toEqual({ enabled: true, headless: true, noSandbox: true })
   })
 
+  it('writes AGENTS.md with auto-generated content when no agentsMd provided', async () => {
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({}, runtime)
+
+    const agentsMd = await readFile(join(ws.profileDir, 'workspace', 'AGENTS.md'), 'utf-8')
+    expect(agentsMd).toContain('Claw Harness: Network Access')
+    expect(agentsMd).toContain('Do not use `web_fetch` for localhost')
+    expect(agentsMd).toContain('curl')
+  })
+
+  it('writes AGENTS.md with user content + auto-generated content when agentsMd provided', async () => {
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({ agentsMd: 'Use API token abc123 for authentication.' }, runtime)
+
+    const agentsMd = await readFile(join(ws.profileDir, 'workspace', 'AGENTS.md'), 'utf-8')
+    expect(agentsMd).toContain('Use API token abc123 for authentication.')
+    expect(agentsMd).toContain('Claw Harness: Network Access')
+    // User content should come before auto-generated content
+    const userIdx = agentsMd.indexOf('abc123')
+    const autoIdx = agentsMd.indexOf('Claw Harness: Network Access')
+    expect(userIdx).toBeLessThan(autoIdx)
+  })
+
   it('local mode does not include browser config in openclaw.json', async () => {
     const ws = new Workspace('test-ws', TEST_DIR)
     const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
