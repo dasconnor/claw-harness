@@ -35,6 +35,7 @@ export class ClawBench {
     this.nextPortIndex++
 
     const bot = new Bot(id, config, {
+      mode: this.config.mode,
       port,
       workspaceDir: this.config.workspaceDir,
       anthropicApiKey: this.config.anthropicApiKey,

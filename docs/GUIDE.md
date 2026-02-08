@@ -165,6 +165,47 @@ At least one field is required when `expect` is specified.
 
 Use personas via `user_md: presets/personas/friendly.md` in your bot config.
 
+## Docker Mode
+
+Docker mode runs each bot's OpenClaw gateway inside a container with Xvfb and Chromium, providing headless browser support and filesystem isolation. No browser windows pop up on your desktop.
+
+### Prerequisites
+
+- **Docker** installed and running
+- No need to install OpenClaw on the host — it's installed inside the container
+
+### Usage
+
+**CLI:**
+```bash
+clawbench run my-scenario.yaml --docker
+```
+
+**Programmatic:**
+```ts
+const bench = new ClawBench({ mode: 'docker' })
+```
+
+### How It Works
+
+1. On first run, ClawBench builds a Docker image (`clawbench:latest`) containing Node.js 22, Chromium, Xvfb, and OpenClaw (~800MB, cached after first build)
+2. Each bot gets its own container named `clawbench-{botId}`
+3. The bot's profile directory is bind-mounted into the container
+4. Xvfb provides a virtual display for Chromium (no GUI needed)
+5. The container runs `openclaw gateway` with the same profile/port as local mode
+
+### Localhost Access
+
+- **Linux:** Uses `--network host` — containers share the host's network, so `localhost` works as expected
+- **macOS:** Containers use port mapping (`-p`). To reach host services from inside the container, use `host.docker.internal` instead of `localhost`
+
+### Known Limitations
+
+- **First-run build time:** 2-5 minutes to download the base image + Chromium + OpenClaw
+- **OpenClaw version:** Uses `@latest` inside the container, which may differ from the host's version
+- **Orphaned containers:** If ClawBench crashes, containers keep running. Clean up with `docker rm -f $(docker ps -q --filter name=clawbench-)`
+- **No GPU passthrough:** Chromium runs in software rendering mode
+
 ## CLI Reference
 
 ### `clawbench run <scenario.yaml> [options]`

@@ -23,7 +23,7 @@
     "bot-testing",
     "skill-testing"
   ],
-  "files": ["dist", "presets"],
+  "files": ["dist", "presets", "docker"],
   "license": "MIT",
   "engines": {
     "node": ">=22"

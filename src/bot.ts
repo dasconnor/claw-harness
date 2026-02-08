@@ -7,9 +7,17 @@
 import type { BotConfig, BotResponse } from './types.js'
 import { Workspace } from './workspace.js'
 import { Gateway } from './gateway.js'
+import { DockerGateway } from './docker-gateway.js'
 import { AgentClient } from './agent-client.js'
 
+interface GatewayLike {
+  token: string
+  start(env: { anthropicApiKey: string; openaiApiKey: string }): Promise<void>
+  stop(): Promise<void>
+}
+
 export interface BotRuntimeConfig {
+  mode: 'local' | 'docker'
   port: number
   workspaceDir: string
   anthropicApiKey: string
@@ -21,7 +29,7 @@ export class Bot {
   private config: BotConfig
   private runtime: BotRuntimeConfig
   private workspace?: Workspace
-  private gateway?: Gateway
+  private gateway?: GatewayLike
   private client?: AgentClient
   private sessionId: string
 
@@ -41,7 +49,14 @@ export class Bot {
     await this.workspace.setup(this.config, this.runtime)
 
     // 2. Start gateway — clean up workspace if this fails
-    this.gateway = new Gateway(this.id, this.runtime.port, this.workspace.profileName)
+    if (this.runtime.mode === 'docker') {
+      this.gateway = new DockerGateway(
+        this.id, this.runtime.port,
+        this.workspace.profileName, this.workspace.profileDir,
+      )
+    } else {
+      this.gateway = new Gateway(this.id, this.runtime.port, this.workspace.profileName)
+    }
     try {
       await this.gateway.start({
         anthropicApiKey: this.runtime.anthropicApiKey,

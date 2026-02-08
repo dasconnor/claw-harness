@@ -14,15 +14,17 @@ import { deepMerge, getPackageRoot } from './utils.js'
 
 export class Workspace {
   readonly profileName: string
-  private profileDir: string
+  private _profileDir: string
   private workspaceSubdir: string
   private skillsDir: string
+
+  get profileDir(): string { return this._profileDir }
 
   constructor(botId: string, baseDir: string) {
     this.profileName = `clawbench-${botId}`
     const home = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
-    this.profileDir = join(home, `.openclaw-${this.profileName}`)
-    this.workspaceSubdir = join(this.profileDir, 'workspace')
+    this._profileDir = join(home, `.openclaw-${this.profileName}`)
+    this.workspaceSubdir = join(this._profileDir, 'workspace')
     this.skillsDir = join(this.workspaceSubdir, 'skills')
   }
 
@@ -36,7 +38,7 @@ export class Workspace {
     // Write openclaw.json
     const openclawConfig = await this.buildConfig(config, runtime)
     await writeFile(
-      join(this.profileDir, 'openclaw.json'),
+      join(this._profileDir, 'openclaw.json'),
       JSON.stringify(openclawConfig, null, 2),
     )
 
@@ -49,7 +51,7 @@ export class Workspace {
       envLines.push(`OPENAI_API_KEY=${runtime.openaiApiKey}`)
     }
     if (envLines.length > 0) {
-      await writeFile(join(this.profileDir, '.env'), envLines.join('\n') + '\n')
+      await writeFile(join(this._profileDir, '.env'), envLines.join('\n') + '\n')
     }
 
     // Write USER.md (persona)
@@ -77,7 +79,7 @@ export class Workspace {
    */
   async cleanup(): Promise<void> {
     try {
-      await rm(this.profileDir, { recursive: true, force: true })
+      await rm(this._profileDir, { recursive: true, force: true })
     } catch {
       // Best-effort cleanup
     }
@@ -107,7 +109,7 @@ export class Workspace {
       }
     }
 
-    const result = deepMerge(base, {
+    let result = deepMerge(base, {
       gateway: {
         mode: 'local',
         port: runtime.port,
@@ -126,6 +128,13 @@ export class Workspace {
         allowBundled: [],
       },
     })
+
+    // Docker mode: enable headless browser with Chromium
+    if (runtime.mode === 'docker') {
+      result = deepMerge(result, {
+        browser: { enabled: true, headless: true, noSandbox: true },
+      })
+    }
 
     // Apply user-specified overrides
     if (config.configOverrides) {

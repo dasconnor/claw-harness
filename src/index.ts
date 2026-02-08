@@ -21,6 +21,7 @@
 
 export { ClawBench } from './bench.js'
 export { Bot } from './bot.js'
+export { DockerGateway } from './docker-gateway.js'
 export { loadScenario } from './scenario-loader.js'
 export { runScenario } from './runner.js'
 export { queryUsage } from './cost-tracker.js'
