@@ -4,7 +4,7 @@
 
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { access } from 'node:fs/promises'
+import { access, readFile } from 'node:fs/promises'
 
 /**
  * Deep merge two objects. Arrays are replaced, not concatenated.
@@ -84,4 +84,36 @@ export async function getPackageRoot(): Promise<string> {
 
   // Fallback to cwd
   return process.cwd()
+}
+
+/**
+ * Load environment variables from .env files.
+ * Searches: cwd/.env, scenario dir/.env. Does not override existing vars.
+ */
+export async function loadEnvFiles(...dirs: string[]): Promise<void> {
+  for (const dir of dirs) {
+    const envPath = join(dir, '.env')
+    try {
+      const content = await readFile(envPath, 'utf-8')
+      for (const line of content.split('\n')) {
+        const trimmed = line.trim()
+        if (!trimmed || trimmed.startsWith('#')) continue
+        const eqIndex = trimmed.indexOf('=')
+        if (eqIndex < 0) continue
+        const key = trimmed.slice(0, eqIndex).trim()
+        let value = trimmed.slice(eqIndex + 1).trim()
+        // Strip surrounding quotes
+        if ((value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))) {
+          value = value.slice(1, -1)
+        }
+        // Don't override existing env vars
+        if (!process.env[key]) {
+          process.env[key] = value
+        }
+      }
+    } catch {
+      // .env file not found — that's fine
+    }
+  }
 }

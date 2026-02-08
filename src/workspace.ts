@@ -40,6 +40,18 @@ export class Workspace {
       JSON.stringify(openclawConfig, null, 2),
     )
 
+    // Write .env file with API keys so the agent can find them
+    const envLines: string[] = []
+    if (runtime.anthropicApiKey) {
+      envLines.push(`ANTHROPIC_API_KEY=${runtime.anthropicApiKey}`)
+    }
+    if (runtime.openaiApiKey) {
+      envLines.push(`OPENAI_API_KEY=${runtime.openaiApiKey}`)
+    }
+    if (envLines.length > 0) {
+      await writeFile(join(this.profileDir, '.env'), envLines.join('\n') + '\n')
+    }
+
     // Write USER.md (persona)
     if (config.userMd) {
       const content = await this.resolveContent(config.userMd)
@@ -98,7 +110,6 @@ export class Workspace {
       agents: {
         defaults: {
           model: config.model ? { primary: config.model } : undefined,
-          tools: { profile: 'full' },
         },
         list: [{ id: 'main', default: true }],
       },

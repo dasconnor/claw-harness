@@ -10,12 +10,7 @@
   },
   "agents": {
     "defaults": {
-      "model": { "primary": "anthropic/claude-haiku-4-5-20251001" },
-      "tools": {
-        "profile": "minimal",
-        "allow": ["read", "write", "web_fetch"],
-        "deny": ["exec", "browser", "canvas"]
-      }
+      "model": { "primary": "anthropic/claude-haiku-4-5-20251001" }
     },
     "list": [
       { "id": "main", "default": true }
