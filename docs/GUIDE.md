@@ -44,6 +44,8 @@ bots:
     user_md: presets/personas/friendly.md   # File path or inline string
     soul_md: |                      # Optional personality
       You are warm and enthusiastic.
+    agents_md: |                    # Operational rules/context (AGENTS.md)
+      Use API token tk_live_abc for all requests.
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app            # Directory name (default: "skill")
@@ -121,6 +123,7 @@ after:
 | `model` | string | No | Model identifier (e.g., `anthropic/claude-haiku-4-5-20251001`) |
 | `user_md` | string | No | File path or inline persona content |
 | `soul_md` | string | No | File path or inline personality content |
+| `agents_md` | string | No | File path or inline operational rules/context (written to AGENTS.md). Use for API tokens, event IDs, and instructions. A web_fetch localhost workaround is auto-appended. |
 | `skills` | array | No | Skills to install (url or path) |
 | `config_overrides` | object | No | Merged into the bot's openclaw.json |
 
