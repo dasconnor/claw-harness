@@ -239,7 +239,6 @@ Features:
   - Health checks (healthcheck.url verified before bot startup)
   - Cleanup hooks (after: steps run even if main steps fail)
   - Cost tracking (automatic with ANTHROPIC_ADMIN_API_KEY)
-  - web_fetch localhost allowlist (auto-configured from target.base_url)
 
 Docker Mode:
   Requires Docker installed. On first run, builds an image (~800MB) with

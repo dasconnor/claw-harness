@@ -328,30 +328,4 @@ steps:
     globalThis.fetch = originalFetch
   })
 
-  it('passes allowed hosts to bot configs from target URL', async () => {
-    const { ClawHarness } = await import('./bench.js')
-
-    const yaml = `
-name: "Allowed Hosts Test"
-target:
-  base_url: "http://localhost:3000"
-  allowed_hosts:
-    - "api.example.com"
-bots:
-  alpha:
-    preset: default
-steps:
-  - bot: alpha
-    prompt: "Hello"
-`
-    const file = join(TEST_DIR, 'allowed-hosts.yaml')
-    await writeFile(file, yaml)
-
-    await runScenario(file)
-
-    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
-    expect(benchInstance.bot).toHaveBeenCalledWith('alpha', expect.objectContaining({
-      allowedHosts: expect.arrayContaining(['localhost', '127.0.0.1', 'api.example.com']),
-    }))
-  })
 })

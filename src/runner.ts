@@ -9,7 +9,6 @@ import { parseDuration, sleep } from './utils.js'
 import type {
   BenchConfig,
   BotConfig,
-  Scenario,
   ScenarioStep,
   ScenarioResult,
   StepResult,
@@ -38,9 +37,6 @@ export async function runScenario(
 
   const bench = new ClawHarness({ mode: 'local', ...options?.configOverrides })
 
-  // Determine allowed hosts from target URL
-  const allowedHosts = buildAllowedHosts(scenario)
-
   // Register bots
   for (const [botId, botConfig] of Object.entries(scenario.bots)) {
     const config: BotConfig = {
@@ -54,7 +50,6 @@ export async function runScenario(
         name: s.name ?? 'skill',
       })),
       configOverrides: botConfig.config_overrides,
-      allowedHosts,
     }
     bench.bot(botId, config)
   }
@@ -121,27 +116,6 @@ async function performHealthCheck(url: string, timeout?: string): Promise<void> 
     const msg = err instanceof Error ? err.message : String(err)
     throw new Error(`Health check failed: ${url} — is the target service running? (${msg})`)
   }
-}
-
-function buildAllowedHosts(scenario: Scenario): string[] {
-  const hosts = new Set<string>(['localhost', '127.0.0.1'])
-
-  if (scenario.target?.base_url) {
-    try {
-      const parsed = new URL(scenario.target.base_url)
-      hosts.add(parsed.hostname)
-    } catch {
-      // Invalid URL, skip
-    }
-  }
-
-  if (scenario.target?.allowed_hosts) {
-    for (const host of scenario.target.allowed_hosts) {
-      hosts.add(host)
-    }
-  }
-
-  return [...hosts]
 }
 
 async function executeSteps(bench: ClawHarness, steps: ScenarioStep[]): Promise<void> {

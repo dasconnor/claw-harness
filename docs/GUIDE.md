@@ -31,9 +31,6 @@ description: "What this test validates"
 # Optional target configuration
 target:
   base_url: "http://localhost:3000"
-  allowed_hosts:                    # Extra hosts for web_fetch allowlist
-    - "api.example.com"
-
 # Optional health check — runs before bots start
 healthcheck:
   url: "http://localhost:3000/health"
@@ -368,15 +365,6 @@ after:
 - Keep personas short (2-3 sentences). Agents work well with brief, clear instructions.
 - Focus on behavioral goals, not technical details.
 - Use `user_md` for inline persona text or file paths for reusable personas.
-
-### web_fetch and Localhost
-
-Claw Harness automatically configures the `web_fetch` allowlist based on `target.base_url`. The following hosts are always allowed:
-- `localhost`
-- `127.0.0.1`
-- The hostname from `target.base_url`
-
-Add extra hosts via `target.allowed_hosts` if your app calls external APIs.
 
 ### Health Checks
 

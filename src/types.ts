@@ -43,8 +43,6 @@ export interface BotConfig {
   skills?: SkillSource[]
   /** Additional config overrides merged into openclaw.json */
   configOverrides?: Record<string, unknown>
-  /** Allowed hosts for web_fetch (set internally by runner) */
-  allowedHosts?: string[]
 }
 
 // --- Bot Response ---
@@ -69,8 +67,6 @@ export interface Scenario {
   description?: string
   target?: {
     base_url?: string
-    /** Additional hosts to allow for web_fetch beyond base_url */
-    allowed_hosts?: string[]
   }
   /** Health check URL to verify before starting bots */
   healthcheck?: {
