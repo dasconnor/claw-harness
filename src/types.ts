@@ -6,7 +6,7 @@
 
 export interface BenchConfig {
   /** Execution mode: 'local' spawns processes, 'docker' uses containers */
-  mode: 'local'
+  mode: 'local' | 'docker'
   /** Base port for gateway allocation. Each bot gets base + (index * 20). Default: 18800 */
   basePort?: number
   /** Directory for bot workspaces. Default: ~/.clawbench/workspaces */
