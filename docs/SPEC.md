@@ -1,14 +1,14 @@
-# ClawBench Spec
+# Claw Harness Spec
 
 *Created: 2026-02-07*
 
 ## Overview
 
-ClawBench is a standalone, open-source testing framework for OpenClaw bots. It spins up real OpenClaw agent instances, loads configurable skills and personas, drives them with multi-turn prompts, and captures their responses for evaluation.
+Claw Harness is a standalone, open-source testing framework for OpenClaw bots. It spins up real OpenClaw agent instances, loads configurable skills and personas, drives them with multi-turn prompts, and captures their responses for evaluation.
 
 The core use case: **can a real AI agent, given only your skill.md, figure out how to use your site?**
 
-Unlike API-level test harnesses that call endpoints directly, ClawBench tests the full agent experience end-to-end -- skill comprehension, API discovery, tool usage, and multi-agent interaction.
+Unlike API-level test harnesses that call endpoints directly, Claw Harness tests the full agent experience end-to-end -- skill comprehension, API discovery, tool usage, and multi-agent interaction.
 
 ---
 
@@ -190,9 +190,9 @@ evaluate:
 ## Programmatic API
 
 ```ts
-import { ClawBench } from 'clawbench'
+import { ClawHarness } from 'claw-harness'
 
-const bench = new ClawBench({ mode: 'local' })
+const bench = new ClawHarness({ mode: 'local' })
 
 const alpha = bench.bot('alpha', {
   preset: 'default',
@@ -231,22 +231,22 @@ await bench.stop()
 
 ```bash
 # Run a scenario
-clawbench run scenarios/lounge-chat.yaml
+claw-harness run scenarios/lounge-chat.yaml
 
 # Run with overrides
-clawbench run scenarios/lounge-chat.yaml \
+claw-harness run scenarios/lounge-chat.yaml \
   --model claude-sonnet-4-5-20250929 \
   --timeout 300
 
 # Output formats
-clawbench run scenarios/lounge-chat.yaml --reporter json > results.json
-clawbench run scenarios/lounge-chat.yaml --reporter markdown
+claw-harness run scenarios/lounge-chat.yaml --reporter json > results.json
+claw-harness run scenarios/lounge-chat.yaml --reporter markdown
 
 # Scaffold a new scenario
-clawbench init my-scenario
+claw-harness init my-scenario
 
 # List available presets
-clawbench presets
+claw-harness presets
 ```
 
 ---
@@ -254,12 +254,12 @@ clawbench presets
 ## Package Structure
 
 ```
-clawbench/
+claw-harness/
 ├── package.json
 ├── tsconfig.json
 ├── src/
 │   ├── index.ts                # Public API exports
-│   ├── bench.ts                # ClawBench main class
+│   ├── bench.ts                # Claw Harness main class
 │   ├── bot.ts                  # Bot instance (workspace + gateway + agent)
 │   ├── workspace.ts            # Creates isolated workspace dirs
 │   ├── gateway.ts              # Starts/stops OpenClaw gateway processes
@@ -285,7 +285,7 @@ clawbench/
 │   └── scenarios/
 │       └── example-chat.yaml
 └── bin/
-    └── clawbench.ts            # CLI entry point
+    └── claw-harness.ts            # CLI entry point
 ```
 
 ---
@@ -301,7 +301,7 @@ clawbench/
 - Preset system for reusable configs
 - Console + JSON reporters
 - Conversation log collection (no built-in eval -- logs are the output)
-- CLI: `clawbench run`, `clawbench init`, `clawbench presets`
+- CLI: `claw-harness run`, `claw-harness init`, `claw-harness presets`
 - Programmatic API for integration with test frameworks (Vitest, Jest, etc.)
 
 ### v0.2 (Future)
@@ -356,8 +356,8 @@ Future versions can add the WebSocket protocol for streaming and tool-call-level
 OpenClaw's `--profile` flag scopes all state automatically:
 
 ```bash
-openclaw --profile clawbench-alpha gateway --port 18789
-# All state lives under ~/.openclaw-clawbench-alpha/
+openclaw --profile claw-harness-alpha gateway --port 18789
+# All state lives under ~/.openclaw-claw-harness-alpha/
 ```
 
 Each profile gets its own config, workspace, skills, and sessions. Port spacing of 20+ is required between instances.
@@ -367,7 +367,7 @@ Each profile gets its own config, workspace, skills, and sessions. Port spacing 
 No CLI needed. Drop a `SKILL.md` in the workspace skills directory:
 
 ```
-~/.openclaw-clawbench-alpha/workspace/skills/moltup/SKILL.md
+~/.openclaw-claw-harness-alpha/workspace/skills/moltup/SKILL.md
 ```
 
 Workspace skills have highest precedence. Set `skills.allowBundled: []` to disable all bundled skills.
@@ -386,7 +386,7 @@ Bootstrap files in the workspace root get injected into the system prompt:
   "gateway": {
     "mode": "local",
     "port": 18789,
-    "auth": { "token": "clawbench-alpha-token" },
+    "auth": { "token": "claw-harness-alpha-token" },
     "http": {
       "endpoints": {
         "chatCompletions": { "enabled": true }
@@ -408,13 +408,13 @@ Bootstrap files in the workspace root get injected into the system prompt:
 }
 ```
 
-### Bot Lifecycle (what ClawBench does per bot)
+### Bot Lifecycle (what Claw Harness does per bot)
 
-1. Create profile directory (`~/.openclaw-clawbench-<id>/`)
+1. Create profile directory (`~/.openclaw-claw-harness-<id>/`)
 2. Write `openclaw.json` from preset + overrides
 3. Fetch skill.md(s) from URL or copy from local path into `workspace/skills/`
 4. Write `USER.md` (persona) into `workspace/`
-5. Start gateway: `openclaw --profile clawbench-<id> gateway --port <port>`
+5. Start gateway: `openclaw --profile claw-harness-<id> gateway --port <port>`
 6. Health-check poll until ready
 7. Send prompts via HTTP `/v1/chat/completions`
 8. Collect responses

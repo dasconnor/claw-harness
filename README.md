@@ -1,15 +1,15 @@
-# ClawBench
+# Claw Harness
 
 Testing framework for [OpenClaw](https://openclaw.ai) bots. Spin up real agent instances, load skills and personas, drive multi-turn prompts, and capture results.
 
 **Can a real AI agent, given only your skill.md, figure out how to use your site?**
 
-Unlike API-level test harnesses, ClawBench tests the full agent experience end-to-end — skill comprehension, API discovery, tool usage, and multi-agent interaction.
+Unlike API-level test harnesses, Claw Harness tests the full agent experience end-to-end — skill comprehension, API discovery, tool usage, and multi-agent interaction.
 
 ## Quick Start
 
 ```bash
-npm install clawbench
+npm install claw-harness
 ```
 
 **Prerequisites:**
@@ -21,21 +21,21 @@ npm install clawbench
 
 ```bash
 # Scaffold a new scenario from the example template
-clawbench init my-test
+claw-harness init my-test
 
 # Run it
-clawbench run my-test.yaml
+claw-harness run my-test.yaml
 
 # Output as JSON
-clawbench run my-test.yaml --reporter json > results.json
+claw-harness run my-test.yaml --reporter json > results.json
 ```
 
 ### Programmatic API
 
 ```ts
-import { ClawBench } from 'clawbench'
+import { ClawHarness } from 'claw-harness'
 
-const bench = new ClawBench({ mode: 'local' })
+const bench = new ClawHarness({ mode: 'local' })
 
 const bot = bench.bot('alpha', {
   preset: 'default',
@@ -104,9 +104,9 @@ steps:
 ## CLI
 
 ```
-clawbench run <scenario.yaml> [options]   Run a test scenario
-clawbench init [name]                     Scaffold a new scenario
-clawbench presets                         List available presets
+claw-harness run <scenario.yaml> [options]   Run a test scenario
+claw-harness init [name]                     Scaffold a new scenario
+claw-harness presets                         List available presets
 
 Options:
   --model <model>       Override model for all bots
@@ -115,7 +115,7 @@ Options:
 
 ## Presets
 
-ClawBench ships with presets for common configurations:
+Claw Harness ships with presets for common configurations:
 
 **Configs** — merged into each bot's `openclaw.json`:
 - `default` — Full tools, Haiku model
@@ -130,7 +130,7 @@ ClawBench ships with presets for common configurations:
 
 Each bot gets full isolation:
 
-1. **Workspace** — A dedicated profile directory (`~/.openclaw-clawbench-<id>/`) with its own `openclaw.json`, `USER.md`, and skills
+1. **Workspace** — A dedicated profile directory (`~/.openclaw-claw-harness-<id>/`) with its own `openclaw.json`, `USER.md`, and skills
 2. **Gateway** — Its own OpenClaw gateway process on a dedicated port
 3. **Communication** — Prompts sent via the OpenAI-compatible HTTP API (`/v1/chat/completions`)
 
@@ -139,8 +139,8 @@ Bots have no shared state. They interact only through the target application, ju
 ## Development
 
 ```bash
-git clone https://github.com/dasconnor/claw-bench.git
-cd claw-bench
+git clone https://github.com/dasconnor/claw-harness.git
+cd claw-harness
 npm install
 npm test          # Run tests (vitest)
 npm run build     # Build to dist/

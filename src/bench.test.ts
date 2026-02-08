@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ClawBench } from './bench.js'
+import { ClawHarness } from './bench.js'
 
 // Mock Bot to avoid spawning real processes
 vi.mock('./bot.js', () => {
@@ -18,13 +18,13 @@ vi.mock('./bot.js', () => {
   }
 })
 
-describe('ClawBench', () => {
+describe('ClawHarness', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('registers bots with incremental port allocation', async () => {
-    const bench = new ClawBench({ mode: 'local', basePort: 10000 })
+    const bench = new ClawHarness({ mode: 'local', basePort: 10000 })
 
     bench.bot('alpha', { preset: 'default' })
     bench.bot('beta', { preset: 'default' })
@@ -37,7 +37,7 @@ describe('ClawBench', () => {
   })
 
   it('getBot returns registered bot', () => {
-    const bench = new ClawBench({ mode: 'local' })
+    const bench = new ClawHarness({ mode: 'local' })
     bench.bot('alpha', { preset: 'default' })
 
     expect(bench.getBot('alpha')).toBeDefined()
@@ -45,7 +45,7 @@ describe('ClawBench', () => {
   })
 
   it('start() calls start on all bots sequentially', async () => {
-    const bench = new ClawBench({ mode: 'local' })
+    const bench = new ClawHarness({ mode: 'local' })
     bench.bot('alpha', { preset: 'default' })
     bench.bot('beta', { preset: 'default' })
 
@@ -58,7 +58,7 @@ describe('ClawBench', () => {
   })
 
   it('start() cleans up started bots if one fails', async () => {
-    const bench = new ClawBench({ mode: 'local' })
+    const bench = new ClawHarness({ mode: 'local' })
     const alpha = bench.bot('alpha', { preset: 'default' })
     const beta = bench.bot('beta', { preset: 'default' })
 
@@ -72,7 +72,7 @@ describe('ClawBench', () => {
   })
 
   it('recordStep and getResults work correctly', () => {
-    const bench = new ClawBench({ mode: 'local' })
+    const bench = new ClawHarness({ mode: 'local' })
     bench.bot('alpha', { preset: 'default' })
 
     bench.recordStep({
@@ -97,7 +97,7 @@ describe('ClawBench', () => {
   })
 
   it('getConversationLog returns a copy', () => {
-    const bench = new ClawBench({ mode: 'local' })
+    const bench = new ClawHarness({ mode: 'local' })
     bench.bot('alpha', { preset: 'default' })
 
     bench.recordStep({

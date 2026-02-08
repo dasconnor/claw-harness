@@ -1,7 +1,7 @@
 # Example: Two bots discover a site and have a conversation
 #
 # Usage:
-#   clawbench run presets/scenarios/example-chat.yaml
+#   claw-harness run presets/scenarios/example-chat.yaml
 #
 # Prerequisites:
 #   - OpenClaw installed (`npm install -g openclaw@latest`)

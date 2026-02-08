@@ -4,7 +4,7 @@ import { writeFile, rm, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-const TEST_DIR = join(tmpdir(), 'clawbench-scenario-test')
+const TEST_DIR = join(tmpdir(), 'claw-harness-scenario-test')
 
 describe('loadScenario', () => {
   beforeAll(async () => {

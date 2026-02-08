@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * ClawBench CLI
+ * Claw Harness CLI
  *
  * Usage:
- *   clawbench run <scenario.yaml> [options]
- *   clawbench init <name>
- *   clawbench presets
+ *   claw-harness run <scenario.yaml> [options]
+ *   claw-harness init <name>
+ *   claw-harness presets
  */
 
 import { runScenario } from '../runner.js'
@@ -43,13 +43,14 @@ async function main() {
 async function handleRun(args: string[]) {
   const scenarioPath = args[0]
   if (!scenarioPath) {
-    console.error('Usage: clawbench run <scenario.yaml>')
+    console.error('Usage: claw-harness run <scenario.yaml>')
     process.exit(1)
   }
 
   // Parse optional flags
   let model: string | undefined
   let reporter = 'console'
+  let docker = false
 
   for (let i = 1; i < args.length; i++) {
     switch (args[i]) {
@@ -58,6 +59,9 @@ async function handleRun(args: string[]) {
         break
       case '--reporter':
         reporter = args[++i]
+        break
+      case '--docker':
+        docker = true
         break
     }
   }
@@ -73,6 +77,7 @@ async function handleRun(args: string[]) {
 
   const result = await runScenario(scenarioPath, {
     modelOverride: model,
+    configOverrides: docker ? { mode: 'docker' as const } : undefined,
   })
 
   console.log()
@@ -212,16 +217,17 @@ async function handlePresets() {
 
 function printHelp() {
   console.log(`
-ClawBench — Testing framework for OpenClaw bots
+Claw Harness — Testing framework for OpenClaw bots
 
 Usage:
-  clawbench run <scenario.yaml> [options]   Run a test scenario
-  clawbench init [name]                     Scaffold a new scenario
-  clawbench presets                         List available presets
+  claw-harness run <scenario.yaml> [options]   Run a test scenario
+  claw-harness init [name]                     Scaffold a new scenario
+  claw-harness presets                         List available presets
 
 Options:
   --model <model>       Override model for all bots
   --reporter <format>   Output format: console (default) | json
+  --docker              Run bots in Docker containers (Xvfb + Chromium)
 
 Environment:
   ANTHROPIC_API_KEY          Required for Claude models
@@ -235,9 +241,15 @@ Features:
   - Cost tracking (automatic with ANTHROPIC_ADMIN_API_KEY)
   - web_fetch localhost allowlist (auto-configured from target.base_url)
 
+Docker Mode:
+  Requires Docker installed. On first run, builds an image (~800MB) with
+  Node.js, Chromium, and Xvfb. Bots run in isolated containers with
+  headless browser support — no windows pop up on your desktop.
+
 Examples:
-  clawbench run scenarios/lounge-chat.yaml
-  clawbench run scenarios/lounge-chat.yaml --reporter json > results.json
+  claw-harness run scenarios/lounge-chat.yaml
+  claw-harness run scenarios/lounge-chat.yaml --docker
+  claw-harness run scenarios/lounge-chat.yaml --reporter json > results.json
 `)
 }
 

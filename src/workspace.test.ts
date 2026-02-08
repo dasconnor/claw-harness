@@ -4,7 +4,7 @@ import { mkdir, writeFile, readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-const TEST_DIR = join(tmpdir(), 'clawbench-workspace-test')
+const TEST_DIR = join(tmpdir(), 'claw-harness-workspace-test')
 
 describe('Workspace', () => {
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('Workspace', () => {
     await rm(TEST_DIR, { recursive: true, force: true })
     // Clean up any test profile directories
     const home = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
-    await rm(join(home, '.openclaw-clawbench-test-ws'), { recursive: true, force: true }).catch(() => {})
+    await rm(join(home, '.openclaw-claw-harness-test-ws'), { recursive: true, force: true }).catch(() => {})
   })
 
   it('resolveContent returns inline content for strings with newlines', async () => {
@@ -47,9 +47,35 @@ describe('Workspace', () => {
 
   it('installSkill throws for skill with no url or path', async () => {
     const ws = new Workspace('test-ws', TEST_DIR)
-    const runtime = { port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
     await ws.setup({ skills: [{}] }, runtime).catch(err => {
       expect(err.message).toBe('Skill must have either url or path')
     })
+  })
+
+  it('profileDir getter returns the profile directory path', () => {
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const home = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp'
+    expect(ws.profileDir).toBe(join(home, '.openclaw-claw-harness-test-ws'))
+  })
+
+  it('docker mode includes browser config in openclaw.json', async () => {
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'docker' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({}, runtime)
+
+    const configPath = join(ws.profileDir, 'openclaw.json')
+    const config = JSON.parse(await readFile(configPath, 'utf-8'))
+    expect(config.browser).toEqual({ enabled: true, headless: true, noSandbox: true })
+  })
+
+  it('local mode does not include browser config in openclaw.json', async () => {
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({}, runtime)
+
+    const configPath = join(ws.profileDir, 'openclaw.json')
+    const config = JSON.parse(await readFile(configPath, 'utf-8'))
+    expect(config.browser).toBeUndefined()
   })
 })

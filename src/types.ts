@@ -1,15 +1,15 @@
 /**
- * Core type definitions for ClawBench.
+ * Core type definitions for Claw Harness.
  */
 
 // --- Bench Configuration ---
 
 export interface BenchConfig {
   /** Execution mode: 'local' spawns processes, 'docker' uses containers */
-  mode: 'local'
+  mode: 'local' | 'docker'
   /** Base port for gateway allocation. Each bot gets base + (index * 20). Default: 18800 */
   basePort?: number
-  /** Directory for bot workspaces. Default: ~/.clawbench/workspaces */
+  /** Directory for bot workspaces. Default: ~/.claw-harness/workspaces */
   workspaceDir?: string
   /** Anthropic API key. Default: reads from ANTHROPIC_API_KEY env var */
   anthropicApiKey?: string

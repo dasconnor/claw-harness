@@ -2,7 +2,7 @@
  * Runner — Executes a scenario against a set of bots.
  */
 
-import { ClawBench } from './bench.js'
+import { ClawHarness } from './bench.js'
 import { loadScenario } from './scenario-loader.js'
 import { queryUsage } from './cost-tracker.js'
 import { parseDuration, sleep } from './utils.js'
@@ -36,7 +36,7 @@ export async function runScenario(
     await performHealthCheck(scenario.healthcheck.url, scenario.healthcheck.timeout)
   }
 
-  const bench = new ClawBench({ mode: 'local', ...options?.configOverrides })
+  const bench = new ClawHarness({ mode: 'local', ...options?.configOverrides })
 
   // Determine allowed hosts from target URL
   const allowedHosts = buildAllowedHosts(scenario)
@@ -144,7 +144,7 @@ function buildAllowedHosts(scenario: Scenario): string[] {
   return [...hosts]
 }
 
-async function executeSteps(bench: ClawBench, steps: ScenarioStep[]): Promise<void> {
+async function executeSteps(bench: ClawHarness, steps: ScenarioStep[]): Promise<void> {
   for (const step of steps) {
     if (step.parallel) {
       // Execute parallel steps concurrently — use allSettled so one failure doesn't kill others
@@ -173,7 +173,7 @@ async function executeSteps(bench: ClawBench, steps: ScenarioStep[]): Promise<vo
   }
 }
 
-async function executeSingleStep(bench: ClawBench, step: ScenarioStep): Promise<void> {
+async function executeSingleStep(bench: ClawHarness, step: ScenarioStep): Promise<void> {
   if (!step.bot || !step.prompt) return
 
   const bot = bench.getBot(step.bot)

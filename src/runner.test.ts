@@ -4,7 +4,7 @@ import { writeFile, rm, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-const TEST_DIR = join(tmpdir(), 'clawbench-runner-test')
+const TEST_DIR = join(tmpdir(), 'claw-harness-runner-test')
 
 // Mock cost tracker
 vi.mock('./cost-tracker.js', () => ({
@@ -29,7 +29,7 @@ vi.mock('./bench.js', () => {
   const stepResults: unknown[] = []
 
   return {
-    ClawBench: vi.fn().mockImplementation(() => ({
+    ClawHarness: vi.fn().mockImplementation(() => ({
       bot: vi.fn().mockImplementation((id: string) => {
         const bot = { ...mockBot, id, send: vi.fn().mockResolvedValue({
           text: 'response',
@@ -92,7 +92,7 @@ steps:
   })
 
   it('passes model override to bot config', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "Model Override Test"
@@ -109,8 +109,8 @@ steps:
 
     await runScenario(file, { modelOverride: 'anthropic/claude-sonnet-4-5-20250929' })
 
-    // Verify ClawBench was constructed and bot was registered
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    // Verify ClawHarness was constructed and bot was registered
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     expect(benchInstance.bot).toHaveBeenCalledWith('alpha', expect.objectContaining({
       model: 'anthropic/claude-sonnet-4-5-20250929',
     }))
@@ -136,7 +136,7 @@ steps:
   })
 
   it('evaluates contains assertion — pass', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "Assert Contains Pass"
@@ -154,7 +154,7 @@ steps:
 
     await runScenario(file)
 
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     expect(benchInstance.recordStep).toHaveBeenCalledWith(
       expect.objectContaining({
         assertions: [
@@ -165,7 +165,7 @@ steps:
   })
 
   it('evaluates contains assertion — fail', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "Assert Contains Fail"
@@ -183,7 +183,7 @@ steps:
 
     await runScenario(file)
 
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     expect(benchInstance.recordStep).toHaveBeenCalledWith(
       expect.objectContaining({
         assertions: [
@@ -194,7 +194,7 @@ steps:
   })
 
   it('evaluates not_contains assertion', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "Assert Not Contains"
@@ -212,7 +212,7 @@ steps:
 
     await runScenario(file)
 
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     expect(benchInstance.recordStep).toHaveBeenCalledWith(
       expect.objectContaining({
         assertions: [
@@ -223,7 +223,7 @@ steps:
   })
 
   it('evaluates matches assertion', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "Assert Matches"
@@ -241,7 +241,7 @@ steps:
 
     await runScenario(file)
 
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     expect(benchInstance.recordStep).toHaveBeenCalledWith(
       expect.objectContaining({
         assertions: [
@@ -252,7 +252,7 @@ steps:
   })
 
   it('runs after steps even when main steps fail', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "After Steps Test"
@@ -271,7 +271,7 @@ after:
 
     await runScenario(file)
 
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     // recordStep should be called for both main and after steps
     expect(benchInstance.recordStep).toHaveBeenCalledTimes(2)
   })
@@ -329,7 +329,7 @@ steps:
   })
 
   it('passes allowed hosts to bot configs from target URL', async () => {
-    const { ClawBench } = await import('./bench.js')
+    const { ClawHarness } = await import('./bench.js')
 
     const yaml = `
 name: "Allowed Hosts Test"
@@ -349,7 +349,7 @@ steps:
 
     await runScenario(file)
 
-    const benchInstance = vi.mocked(ClawBench).mock.results[0]?.value
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
     expect(benchInstance.bot).toHaveBeenCalledWith('alpha', expect.objectContaining({
       allowedHosts: expect.arrayContaining(['localhost', '127.0.0.1', 'api.example.com']),
     }))

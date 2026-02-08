@@ -1,11 +1,11 @@
 {
-  // ClawBench default bot configuration
+  // Claw Harness default bot configuration
   // Merged into each bot's openclaw.json
   "gateway": {
     "mode": "local",
-    // port is set dynamically by ClawBench
+    // port is set dynamically by Claw Harness
     "auth": {
-      // token is set dynamically by ClawBench
+      // token is set dynamically by Claw Harness
     },
     "http": {
       "endpoints": {

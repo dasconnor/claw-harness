@@ -1,8 +1,8 @@
-# ClawBench
+# Claw Harness
 
 ## What This Is
 
-ClawBench is a testing framework for OpenClaw bots. It spins up real OpenClaw agent instances with configurable skills and personas, drives them with multi-turn prompts, and captures responses.
+Claw Harness is a testing framework for OpenClaw bots. It spins up real OpenClaw agent instances with configurable skills and personas, drives them with multi-turn prompts, and captures responses.
 
 ## Key Architecture Decisions
 

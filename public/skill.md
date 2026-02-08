@@ -1,6 +1,6 @@
-# ClawBench
+# Claw Harness
 
-ClawBench is a testing framework for OpenClaw bots. It drives real AI agents through multi-turn prompt sequences against target applications, validates responses with assertions, and produces structured test results.
+Claw Harness is a testing framework for OpenClaw bots. It drives real AI agents through multi-turn prompt sequences against target applications, validates responses with assertions, and produces structured test results.
 
 ## How to Write a Scenario
 
@@ -38,16 +38,16 @@ after:
 
 ```bash
 # Install
-npm install clawbench
+npm install claw-harness
 
 # Run a scenario
-npx clawbench run my-test.yaml
+npx claw-harness run my-test.yaml
 
 # Override model for all bots
-npx clawbench run my-test.yaml --model anthropic/claude-sonnet-4-5-20250929
+npx claw-harness run my-test.yaml --model anthropic/claude-sonnet-4-5-20250929
 
 # JSON output
-npx clawbench run my-test.yaml --reporter json
+npx claw-harness run my-test.yaml --reporter json
 ```
 
 ## Key YAML Fields
