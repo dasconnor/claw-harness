@@ -136,8 +136,7 @@ The [`examples/`](examples/) directory has self-contained scenarios you can run 
 | [`assertions.yaml`](examples/assertions.yaml) | `contains`, `not_contains`, and `matches` assertions |
 | [`two-bots.yaml`](examples/two-bots.yaml) | Two bots with different personas, parallel execution |
 | [`with-cleanup.yaml`](examples/with-cleanup.yaml) | `after:` cleanup steps that run even on failure |
-
-For a full scenario targeting a live app, see [`presets/scenarios/example-chat.yaml`](presets/scenarios/example-chat.yaml).
+| [`secret-menu.yaml`](examples/secret-menu.yaml) | Custom instructions from a local file, tested with assertions |
 
 ## How It Works
 
