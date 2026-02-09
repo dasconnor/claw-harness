@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Workspace } from './workspace.js'
 import { mkdir, writeFile, readFile, rm, access } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -126,6 +126,25 @@ describe('Workspace', () => {
     await ws.setup({}, runtime)
 
     await expect(access(staleDir)).rejects.toThrow()
+  })
+
+  it('installSkill fetches from URL and writes SKILL.md', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('# My Remote Skill\nDo things.'),
+    }))
+
+    const ws = new Workspace('test-ws', TEST_DIR)
+    const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
+    await ws.setup({ skills: [{ url: 'https://example.com/skill.md', name: 'remote-skill' }] }, runtime)
+
+    expect(fetch).toHaveBeenCalledWith(
+      'https://example.com/skill.md',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    )
+
+    const skillContent = await readFile(join(ws.profileDir, 'workspace', 'skills', 'remote-skill', 'SKILL.md'), 'utf-8')
+    expect(skillContent).toBe('# My Remote Skill\nDo things.')
   })
 
   it('cleanup removes the default-location workspace dir', async () => {

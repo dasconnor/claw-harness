@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
-import { runScenario } from './runner.js'
+import { runScenario, evaluateAssertions } from './runner.js'
 import { writeFile, rm, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -328,4 +328,123 @@ steps:
     globalThis.fetch = originalFetch
   })
 
+  it('executes parallel steps concurrently', async () => {
+    const { ClawHarness } = await import('./bench.js')
+
+    const yaml = `
+name: "Parallel Test"
+bots:
+  alpha:
+    preset: default
+  beta:
+    preset: default
+steps:
+  - parallel:
+    - bot: alpha
+      prompt: "Alpha task"
+    - bot: beta
+      prompt: "Beta task"
+`
+    const file = join(TEST_DIR, 'parallel.yaml')
+    await writeFile(file, yaml)
+
+    await runScenario(file)
+
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
+    // Both bots should have received send() calls
+    const alpha = benchInstance.getBot('alpha')
+    const beta = benchInstance.getBot('beta')
+    expect(alpha.send).toHaveBeenCalledWith('Alpha task')
+    expect(beta.send).toHaveBeenCalledWith('Beta task')
+  })
+
+  it('times out a step that exceeds its duration', async () => {
+    const { ClawHarness } = await import('./bench.js')
+
+    const yaml = `
+name: "Timeout Test"
+bots:
+  alpha:
+    preset: default
+steps:
+  - bot: alpha
+    prompt: "Slow task"
+    timeout: "100ms"
+`
+    const file = join(TEST_DIR, 'timeout.yaml')
+    await writeFile(file, yaml)
+
+    // Make bot.send() return a never-resolving promise
+    const mockBench = vi.mocked(ClawHarness).mock.results
+
+    // Re-mock send to hang forever for the next scenario
+    const originalMock = vi.mocked(ClawHarness)
+    const prevImpl = originalMock.getMockImplementation()
+
+    originalMock.mockImplementationOnce((...args: unknown[]) => {
+      const instance = prevImpl ? (prevImpl as Function)(...args) : ({} as any)
+      const bots = new Map()
+      return {
+        ...instance,
+        bot: vi.fn().mockImplementation((id: string) => {
+          const bot = {
+            id,
+            send: vi.fn().mockReturnValue(new Promise(() => {})), // never resolves
+          }
+          bots.set(id, bot)
+          return bot
+        }),
+        start: vi.fn().mockResolvedValue(undefined),
+        stop: vi.fn().mockResolvedValue(undefined),
+        getBot: vi.fn().mockImplementation((id: string) => bots.get(id)),
+        recordStep: vi.fn(),
+        getResults: vi.fn().mockReturnValue({
+          name: '',
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          duration: 0,
+          steps: [],
+          bots: {},
+          assertions: { total: 0, passed: 0, failed: 0 },
+        }),
+      }
+    })
+
+    await runScenario(file)
+
+    const benchInstance = vi.mocked(ClawHarness).mock.results[0]?.value
+    expect(benchInstance.recordStep).toHaveBeenCalledWith(
+      expect.objectContaining({
+        response: expect.objectContaining({
+          ok: false,
+          error: expect.stringContaining('Timeout'),
+        }),
+      }),
+    )
+  })
+
+})
+
+describe('evaluateAssertions', () => {
+  it('evaluates all assertion types on a single step', () => {
+    const results = evaluateAssertions('hello world', {
+      contains: 'hello',
+      not_contains: 'goodbye',
+      matches: 'h.*d',
+    })
+    expect(results).toEqual([
+      { type: 'contains', expected: 'hello', passed: true },
+      { type: 'not_contains', expected: 'goodbye', passed: true },
+      { type: 'matches', expected: 'h.*d', passed: true },
+    ])
+  })
+
+  it('marks invalid regex as failed instead of crashing', () => {
+    const results = evaluateAssertions('some text', {
+      matches: '[unclosed',
+    })
+    expect(results).toEqual([
+      { type: 'matches', expected: '[unclosed', passed: false },
+    ])
+  })
 })

@@ -199,7 +199,7 @@ async function executeSingleStep(bench: ClawHarness, step: ScenarioStep): Promis
   }
 }
 
-function evaluateAssertions(text: string, expect: StepExpectation): AssertionResult[] {
+export function evaluateAssertions(text: string, expect: StepExpectation): AssertionResult[] {
   const results: AssertionResult[] = []
 
   if (expect.contains !== undefined) {
@@ -219,10 +219,16 @@ function evaluateAssertions(text: string, expect: StepExpectation): AssertionRes
   }
 
   if (expect.matches !== undefined) {
+    let passed: boolean
+    try {
+      passed = new RegExp(expect.matches).test(text)
+    } catch {
+      passed = false
+    }
     results.push({
       type: 'matches',
       expected: expect.matches,
-      passed: new RegExp(expect.matches).test(text),
+      passed,
     })
   }
 
