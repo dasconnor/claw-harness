@@ -104,7 +104,7 @@ describe('DockerGateway', () => {
       const imageIndex = args.indexOf('claw-harness:latest')
       expect(imageIndex).toBeGreaterThan(-1)
       expect(args.slice(imageIndex + 1)).toEqual([
-        'openclaw', '--profile', 'claw-harness-alpha', 'gateway', '--port', '18800',
+        'openclaw', '--profile', 'claw-harness-alpha', 'gateway', '--port', '18800', '--bind', 'lan',
       ])
     })
   })
