@@ -1,0 +1,41 @@
+# Two Bots — parallel execution with different personas
+#
+# Usage:
+#   claw-harness run examples/two-bots.yaml
+#
+# Each bot gets its own isolated OpenClaw instance on a separate port.
+# Parallel steps run both bots concurrently.
+
+name: "Two Bots"
+
+bots:
+  poet:
+    preset: default
+    soul_md: "You are a poet. You express everything in short, vivid verse."
+
+  scientist:
+    preset: default
+    soul_md: "You are a scientist. You explain everything with precision and evidence."
+
+steps:
+  # Each bot answers the same question in its own style
+  - parallel:
+      - bot: poet
+        prompt: "Explain why the sky is blue."
+        timeout: 30s
+      - bot: scientist
+        prompt: "Explain why the sky is blue."
+        timeout: 30s
+
+  # Follow-up questions in sequence
+  - bot: poet
+    prompt: "Now describe a sunset."
+    timeout: 30s
+    expect:
+      not_contains: "error"
+
+  - bot: scientist
+    prompt: "Now explain why sunsets are red and orange."
+    timeout: 30s
+    expect:
+      not_contains: "error"

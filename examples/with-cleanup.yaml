@@ -1,0 +1,29 @@
+# Cleanup Steps — after: blocks run even if main steps fail
+#
+# Usage:
+#   claw-harness run examples/with-cleanup.yaml
+#
+# The `after:` section runs cleanup steps regardless of whether
+# the main steps succeed or fail — useful for teardown.
+
+name: "Cleanup Demo"
+
+bots:
+  alpha:
+    preset: default
+
+steps:
+  - bot: alpha
+    prompt: "Write a short grocery list with 5 items."
+    timeout: 30s
+    expect:
+      not_contains: "error"
+
+  - bot: alpha
+    prompt: "Now remove the last two items and show the updated list."
+    timeout: 30s
+
+after:
+  - bot: alpha
+    prompt: "Summarize what you did in this session in one sentence."
+    timeout: 30s

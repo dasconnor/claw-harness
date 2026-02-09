@@ -17,18 +17,18 @@ npm install claw-harness
 - OpenClaw installed (`npm install -g openclaw@latest`)
 - `ANTHROPIC_API_KEY` set in environment
 
-### Run a scenario
+### Run an example
 
 ```bash
-# Scaffold a new scenario from the example template
+# Try the hello world scenario (no target app needed)
+claw-harness run examples/hello-world.yaml
+
+# Or scaffold your own
 claw-harness init my-test
-
-# Run it
 claw-harness run my-test.yaml
-
-# Output as JSON
-claw-harness run my-test.yaml --reporter json > results.json
 ```
+
+See [`examples/`](examples/) for more scenarios you can run immediately.
 
 ### Programmatic API
 
@@ -40,7 +40,7 @@ const bench = new ClawHarness({ mode: 'local' })
 const bot = bench.bot('alpha', {
   preset: 'default',
   skills: [{ url: 'http://localhost:3000/skill.md', name: 'my-app' }],
-  userMd: 'You are a friendly bot.',
+  soulMd: 'You are a friendly bot.',
 })
 
 await bench.start()
@@ -60,14 +60,14 @@ bots:
   alpha:
     preset: default
     model: anthropic/claude-haiku-4-5-20251001
-    user_md: presets/personas/friendly.md
+    soul_md: presets/personas/friendly.md
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app
 
   beta:
     preset: default
-    user_md: presets/personas/curious.md
+    soul_md: presets/personas/curious.md
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app
@@ -121,10 +121,23 @@ Claw Harness ships with presets for common configurations:
 - `default` — Full tools, Haiku model
 - `minimal` — Restricted tools, lower cost
 
-**Personas** — `user.md` templates that shape bot behavior:
+**Personas** — `soul.md` templates that shape bot personality:
 - `friendly` — Outgoing, asks follow-up questions
 - `curious` — Thoughtful, explores ideas deeply
 - `terse` — Brief, technical, to the point
+
+## Examples
+
+The [`examples/`](examples/) directory has self-contained scenarios you can run right away — no target app required:
+
+| Scenario | What it shows |
+|----------|---------------|
+| [`hello-world.yaml`](examples/hello-world.yaml) | Simplest possible scenario — one bot, one prompt |
+| [`assertions.yaml`](examples/assertions.yaml) | `contains`, `not_contains`, and `matches` assertions |
+| [`two-bots.yaml`](examples/two-bots.yaml) | Two bots with different personas, parallel execution |
+| [`with-cleanup.yaml`](examples/with-cleanup.yaml) | `after:` cleanup steps that run even on failure |
+
+For a full scenario targeting a live app, see [`presets/scenarios/example-chat.yaml`](presets/scenarios/example-chat.yaml).
 
 ## How It Works
 

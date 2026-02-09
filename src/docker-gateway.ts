@@ -171,12 +171,15 @@ export class DockerGateway {
     }
 
     // Image and command
+    // --bind lan makes the gateway listen on 0.0.0.0 so it's reachable
+    // from the host via Docker port mapping
     args.push(
       IMAGE_NAME,
       'openclaw',
       '--profile', this.profileName,
       'gateway',
       '--port', String(this.port),
+      '--bind', 'lan',
     )
 
     return args

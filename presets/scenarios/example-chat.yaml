@@ -18,7 +18,7 @@ bots:
   alpha:
     preset: default
     model: anthropic/claude-haiku-4-5-20251001
-    user_md: presets/personas/friendly.md
+    soul_md: presets/personas/friendly.md
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app
@@ -26,7 +26,7 @@ bots:
   beta:
     preset: default
     model: anthropic/claude-haiku-4-5-20251001
-    user_md: presets/personas/curious.md
+    soul_md: presets/personas/curious.md
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app
