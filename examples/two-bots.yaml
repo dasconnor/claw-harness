@@ -11,11 +11,11 @@ name: "Two Bots"
 bots:
   poet:
     preset: default
-    user_md: "You are a poet. You express everything in short, vivid verse."
+    soul_md: "You are a poet. You express everything in short, vivid verse."
 
   scientist:
     preset: default
-    user_md: "You are a scientist. You explain everything with precision and evidence."
+    soul_md: "You are a scientist. You explain everything with precision and evidence."
 
 steps:
   # Each bot answers the same question in its own style

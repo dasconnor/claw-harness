@@ -40,7 +40,7 @@ const bench = new ClawHarness({ mode: 'local' })
 const bot = bench.bot('alpha', {
   preset: 'default',
   skills: [{ url: 'http://localhost:3000/skill.md', name: 'my-app' }],
-  userMd: 'You are a friendly bot.',
+  soulMd: 'You are a friendly bot.',
 })
 
 await bench.start()
@@ -60,14 +60,14 @@ bots:
   alpha:
     preset: default
     model: anthropic/claude-haiku-4-5-20251001
-    user_md: presets/personas/friendly.md
+    soul_md: presets/personas/friendly.md
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app
 
   beta:
     preset: default
-    user_md: presets/personas/curious.md
+    soul_md: presets/personas/curious.md
     skills:
       - url: "http://localhost:3000/skill.md"
         name: target-app
@@ -121,7 +121,7 @@ Claw Harness ships with presets for common configurations:
 - `default` — Full tools, Haiku model
 - `minimal` — Restricted tools, lower cost
 
-**Personas** — `user.md` templates that shape bot behavior:
+**Personas** — `soul.md` templates that shape bot personality:
 - `friendly` — Outgoing, asks follow-up questions
 - `curious` — Thoughtful, explores ideas deeply
 - `terse` — Brief, technical, to the point
