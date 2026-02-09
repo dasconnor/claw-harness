@@ -136,7 +136,7 @@ The [`examples/`](examples/) directory has self-contained scenarios you can run 
 | [`assertions.yaml`](examples/assertions.yaml) | `contains`, `not_contains`, and `matches` assertions |
 | [`two-bots.yaml`](examples/two-bots.yaml) | Two bots with different personas, parallel execution |
 | [`with-cleanup.yaml`](examples/with-cleanup.yaml) | `after:` cleanup steps that run even on failure |
-| [`secret-menu.yaml`](examples/secret-menu.yaml) | Custom instructions from a local file, tested with assertions |
+| [`secret-menu.yaml`](examples/secret-menu.yaml) | Load a custom SKILL.md and verify the bot follows it |
 
 ## How It Works
 
