@@ -11,12 +11,12 @@ import { vi } from 'vitest'
  * Enables `proc.emit('exit', 1)` and `proc.emit('error', err)` in tests.
  */
 export function createMockChildProcess(): ChildProcess {
-  const proc = new EventEmitter() as ChildProcess & EventEmitter
-  proc.stdout = new EventEmitter() as any
-  proc.stderr = new EventEmitter() as any
-  proc.stdin = null as any
+  const proc = new EventEmitter() as any
+  proc.stdout = new EventEmitter()
+  proc.stderr = new EventEmitter()
+  proc.stdin = null
   proc.pid = 12345
   proc.killed = false
   proc.kill = vi.fn(() => { proc.killed = true; return true })
-  return proc
+  return proc as ChildProcess
 }

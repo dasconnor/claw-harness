@@ -47,11 +47,11 @@ describe('runScenario (integration)', () => {
     const { spawn } = await import('node:child_process')
     vi.mocked(spawn).mockImplementation((() => {
       const proc = createMockChildProcess()
-      vi.mocked(proc.kill).mockImplementation((() => {
+      ;(proc as any).kill = vi.fn(() => {
         process.nextTick(() => proc.emit('exit', 0))
-        proc.killed = true
+        ;(proc as any).killed = true
         return true
-      }) as any)
+      })
       return proc
     }) as any)
   })

@@ -381,8 +381,8 @@ steps:
     const originalMock = vi.mocked(ClawHarness)
     const prevImpl = originalMock.getMockImplementation()
 
-    originalMock.mockImplementationOnce((...args: any[]) => {
-      const instance = prevImpl ? prevImpl(...args) : ({} as any)
+    originalMock.mockImplementationOnce((...args: unknown[]) => {
+      const instance = prevImpl ? (prevImpl as Function)(...args) : ({} as any)
       const bots = new Map()
       return {
         ...instance,
