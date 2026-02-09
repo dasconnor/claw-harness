@@ -138,6 +138,25 @@ describe('DockerGateway', () => {
       )
     })
 
+    it('calls inspect before build (correct ordering)', async () => {
+      const { execFileSync } = await import('node:child_process')
+      const callArgs: string[][] = []
+      vi.mocked(execFileSync)
+        .mockImplementationOnce((_cmd, args) => {
+          callArgs.push(args as string[])
+          throw new Error('not found')
+        })
+        .mockImplementationOnce((_cmd, args) => {
+          callArgs.push(args as string[])
+          return Buffer.from('')
+        })
+
+      await ensureImage()
+
+      expect(callArgs[0][0]).toBe('image')   // inspect
+      expect(callArgs[1][0]).toBe('build')    // build
+    })
+
     it('caches result after successful check', async () => {
       const { execFileSync } = await import('node:child_process')
       vi.mocked(execFileSync).mockReturnValue(Buffer.from(''))

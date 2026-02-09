@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ClawHarness } from './bench.js'
 
 // Mock Bot to avoid spawning real processes
@@ -112,5 +112,57 @@ describe('ClawHarness', () => {
     // Modifying the copy should not affect internal state
     log.pop()
     expect(bench.getConversationLog()).toHaveLength(1)
+  })
+
+  it('aggregates assertion counts across steps', () => {
+    const bench = new ClawHarness({ mode: 'local' })
+    bench.bot('alpha', { preset: 'default' })
+
+    bench.recordStep({
+      botId: 'alpha',
+      prompt: 'Step 1',
+      response: { text: 'ok', raw: {}, duration: 50, ok: true },
+      timestamp: new Date().toISOString(),
+      assertions: [
+        { type: 'contains', expected: 'ok', passed: true },
+        { type: 'not_contains', expected: 'error', passed: true },
+      ],
+    })
+
+    bench.recordStep({
+      botId: 'alpha',
+      prompt: 'Step 2',
+      response: { text: 'fail', raw: {}, duration: 50, ok: true },
+      timestamp: new Date().toISOString(),
+      assertions: [
+        { type: 'contains', expected: 'success', passed: false },
+      ],
+    })
+
+    // Step without assertions should not affect counts
+    bench.recordStep({
+      botId: 'alpha',
+      prompt: 'Step 3',
+      response: { text: 'hi', raw: {}, duration: 30, ok: true },
+      timestamp: new Date().toISOString(),
+    })
+
+    const results = bench.getResults()
+    expect(results.assertions).toEqual({ total: 3, passed: 2, failed: 1 })
+  })
+
+  it('populates config from env vars', async () => {
+    vi.stubEnv('ANTHROPIC_API_KEY', 'test-anthropic-key')
+    vi.stubEnv('OPENAI_API_KEY', 'test-openai-key')
+    vi.stubEnv('ANTHROPIC_ADMIN_API_KEY', 'test-admin-key')
+
+    const bench = new ClawHarness({ mode: 'local' })
+    bench.bot('alpha', { preset: 'default' })
+
+    const { Bot } = vi.mocked(await import('./bot.js'))
+    expect(Bot).toHaveBeenCalledWith('alpha', expect.anything(), expect.objectContaining({
+      anthropicApiKey: 'test-anthropic-key',
+      openaiApiKey: 'test-openai-key',
+    }))
   })
 })

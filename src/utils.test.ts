@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest'
-import { deepMerge, parseDuration, getPackageRoot } from './utils.js'
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
+import { deepMerge, parseDuration, getPackageRoot, loadEnvFiles } from './utils.js'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { mkdir, writeFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 
 describe('deepMerge', () => {
   it('merges flat objects', () => {
@@ -34,6 +36,10 @@ describe('deepMerge', () => {
     deepMerge(target, { a: 99 })
     expect(target).toEqual(original)
   })
+
+  it('replaces object with null', () => {
+    expect(deepMerge({ a: { nested: true } }, { a: null } as any)).toEqual({ a: null })
+  })
 })
 
 describe('parseDuration', () => {
@@ -60,5 +66,59 @@ describe('getPackageRoot', () => {
   it('returns a path containing package.json', async () => {
     const root = await getPackageRoot()
     expect(existsSync(join(root, 'package.json'))).toBe(true)
+  })
+})
+
+describe('loadEnvFiles', () => {
+  const TEST_DIR = join(tmpdir(), 'claw-harness-env-test')
+
+  beforeAll(async () => {
+    await mkdir(TEST_DIR, { recursive: true })
+  })
+
+  afterAll(async () => {
+    await rm(TEST_DIR, { recursive: true, force: true })
+  })
+
+  it('parses KEY=value pairs, skipping comments and blank lines', async () => {
+    await writeFile(join(TEST_DIR, '.env'), [
+      '# this is a comment',
+      '',
+      'CH_TEST_FOO=bar',
+      '',
+      'CH_TEST_BAZ=qux=extra',
+    ].join('\n'))
+
+    await loadEnvFiles(TEST_DIR)
+
+    expect(process.env.CH_TEST_FOO).toBe('bar')
+    expect(process.env.CH_TEST_BAZ).toBe('qux=extra')
+  })
+
+  it('strips quotes from values', async () => {
+    await writeFile(join(TEST_DIR, '.env'), [
+      'CH_TEST_SINGLE=\'single-val\'',
+      'CH_TEST_DOUBLE="double-val"',
+    ].join('\n'))
+
+    await loadEnvFiles(TEST_DIR)
+
+    expect(process.env.CH_TEST_SINGLE).toBe('single-val')
+    expect(process.env.CH_TEST_DOUBLE).toBe('double-val')
+  })
+
+  it('does not override existing env vars and skips missing files', async () => {
+    vi.stubEnv('CH_TEST_EXISTING', 'original')
+
+    await writeFile(join(TEST_DIR, '.env'), [
+      'CH_TEST_EXISTING=overridden',
+      'CH_TEST_NEW=fresh',
+    ].join('\n'))
+
+    // Pass both a real dir and a nonexistent dir — should not throw
+    await loadEnvFiles(TEST_DIR, '/nonexistent/path')
+
+    expect(process.env.CH_TEST_EXISTING).toBe('original')
+    expect(process.env.CH_TEST_NEW).toBe('fresh')
   })
 })

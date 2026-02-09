@@ -59,6 +59,28 @@ describe('AgentClient', () => {
     expect(result.error).toContain('Network error')
   })
 
+  it('sends session ID in the user field for multi-turn threading', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        choices: [{ message: { content: 'reply' } }],
+      }),
+    })
+
+    const client = new AgentClient(18800, 'test-token')
+    await client.send('First message', 'session-abc')
+    await client.send('Second message', 'session-abc')
+
+    const calls = vi.mocked(fetch).mock.calls
+    expect(calls).toHaveLength(2)
+
+    // Both calls should include the same session ID in the request body
+    for (const [, init] of calls) {
+      const body = JSON.parse((init as RequestInit).body as string)
+      expect(body.user).toBe('session-abc')
+    }
+  })
+
   it('handles missing choices in response', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
