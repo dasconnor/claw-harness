@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest'
 import { deepMerge, parseDuration, getPackageRoot, loadEnvFiles } from './utils.js'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -78,6 +78,12 @@ describe('loadEnvFiles', () => {
 
   afterAll(async () => {
     await rm(TEST_DIR, { recursive: true, force: true })
+  })
+
+  afterEach(() => {
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith('CH_TEST_')) delete process.env[key]
+    }
   })
 
   it('parses KEY=value pairs, skipping comments and blank lines', async () => {

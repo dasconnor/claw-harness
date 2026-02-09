@@ -129,25 +129,22 @@ describe('Workspace', () => {
   })
 
   it('installSkill fetches from URL and writes SKILL.md', async () => {
-    const originalFetch = globalThis.fetch
-    globalThis.fetch = vi.fn().mockResolvedValue({
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       text: () => Promise.resolve('# My Remote Skill\nDo things.'),
-    }) as unknown as typeof fetch
+    }))
 
     const ws = new Workspace('test-ws', TEST_DIR)
     const runtime = { mode: 'local' as const, port: 18800, workspaceDir: TEST_DIR, anthropicApiKey: 'test', openaiApiKey: '' }
     await ws.setup({ skills: [{ url: 'https://example.com/skill.md', name: 'remote-skill' }] }, runtime)
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
       'https://example.com/skill.md',
       expect.objectContaining({ signal: expect.any(AbortSignal) }),
     )
 
     const skillContent = await readFile(join(ws.profileDir, 'workspace', 'skills', 'remote-skill', 'SKILL.md'), 'utf-8')
     expect(skillContent).toBe('# My Remote Skill\nDo things.')
-
-    globalThis.fetch = originalFetch
   })
 
   it('cleanup removes the default-location workspace dir', async () => {
