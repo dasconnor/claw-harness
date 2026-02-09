@@ -1,0 +1,19 @@
+# Hello World — simplest possible Claw Harness scenario
+#
+# Usage:
+#   claw-harness run examples/hello-world.yaml
+#
+# No target app needed. Just OpenClaw + an API key.
+
+name: "Hello World"
+
+bots:
+  alpha:
+    preset: default
+
+steps:
+  - bot: alpha
+    prompt: "Say hello and tell me one interesting fact about the ocean."
+    timeout: 30s
+    expect:
+      not_contains: "error"
